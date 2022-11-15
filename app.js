@@ -39,7 +39,7 @@ let at = DEFAULT_AT;
 
 let up = DEFAULT_UP;
 
-let velHeli = 0;
+let velHeli = 120;
 
 
 
@@ -57,6 +57,7 @@ function setup(shaders)
     mode = gl.TRIANGLES; 
 
     resize_canvas();
+
     window.addEventListener("resize", resize_canvas);
 
     document.getElementById("axonometric").addEventListener("change", setAxonometricView);
@@ -120,6 +121,18 @@ function setup(shaders)
             case '4':
                 setTopView();
                 break;
+            case 'Space':
+
+                break;
+            case 'ArrowUp':
+
+                break;
+            case 'ArrowDown':
+
+                break;
+            case 'ArrowLeft':
+
+                break;
         }
     }
 
@@ -147,37 +160,26 @@ function setup(shaders)
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
-    function Tail(){
-         // Don't forget to scale the sun, rotate it around the y axis at the correct speed
-        //multRotationY(c++);
+    function tailBody(){
         multTranslation([4, 0.65, 0]);
         multScale([5.20, 0.75, 0.75]);
 
-        // Send the current modelview matrix to the vertex shader
         uploadModelView();
 
-        // Draw a sphere representing the sun
         SPHERE.draw(gl, program, mode);
-    
     }
     
-    function Helicopter()
+    function cockpit()
     {
-        // Don't forget to scale the sun, rotate it around the y axis at the correct speed
         multScale([5.56, 2.6, 2.6]);     
 
-        // Send the current modelview matrix to the vertex shader
         uploadModelView();
 
-        // Draw a sphere representing the sun
         SPHERE.draw(gl, program, mode);
-        
     }
 
-    function Barbatana(){
-     
-    
-        multRotationZ(-30);
+    function tailSkid(){
+        multRotationZ(-20);
         multScale([0.75,1.5,0.75]);
         
         uploadModelView();
@@ -185,8 +187,7 @@ function setup(shaders)
         SPHERE.draw(gl, program, mode);
     }
 
-    function EspigãoBack(){
-
+    function tailRotor(){
         multScale([.25,1,.25]);
 
         uploadModelView();
@@ -194,8 +195,7 @@ function setup(shaders)
         CYLINDER.draw(gl,program,mode);
     }
 
-    function Pa(xTrans){
-        
+    function tailBlades(xTrans){
         multTranslation([xTrans*0.6, 0.8, 0]);
         multScale([1.2, 0.2, 0.2]);
         
@@ -206,8 +206,6 @@ function setup(shaders)
 
     function render()
     {
-
-        
         if(animation) time += speed;
         window.requestAnimationFrame(render);
 
@@ -221,35 +219,33 @@ function setup(shaders)
 
         
         pushMatrix();
-            Helicopter();
+            cockpit();
         popMatrix();
         pushMatrix();
-            Tail();
+            tailBody();
         popMatrix();
         
         pushMatrix();
             pushMatrix();
-            multTranslation([6.60,1.1,0]);
+            multTranslation([6.55,1.2,0]);
             pushMatrix();
-                Barbatana();
+                tailSkid();
             popMatrix();
             pushMatrix();
                 multRotationX(90);
                 multRotationY(velHeli++);
                 pushMatrix();
-                multTranslation([0,0.6,0]);
-                    EspigãoBack();
+                multTranslation([0,0.4,0]);
+                    tailRotor();
                 popMatrix();
                 pushMatrix();
-                    
                     pushMatrix();
-                        Pa(1);
+                        tailBlades(1);
                     popMatrix();
                     pushMatrix();
-                        Pa(-1);
+                        tailBlades(-1);
                     popMatrix();
                 popMatrix();
-
             popMatrix();
         popMatrix();
     }
