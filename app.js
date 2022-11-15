@@ -1,9 +1,10 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
 import { ortho, lookAt, flatten } from "../../libs/MV.js";
-import {modelView, loadMatrix, multRotationY, multScale, multRotationX } from "../../libs/stack.js";
+import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/objects/sphere.js';
-import { multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
+
+import * as CYLINDER from '../../libs/objects/cylinder.js';
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -38,7 +39,7 @@ let at = DEFAULT_AT;
 
 let up = DEFAULT_UP;
 
-
+let velHeli = 0;
 
 
 
@@ -53,7 +54,7 @@ function setup(shaders)
 
     let mProjection = ortho(-VP_DISTANCE*aspect,VP_DISTANCE*aspect, -VP_DISTANCE, VP_DISTANCE,-3*VP_DISTANCE,3*VP_DISTANCE);
 
-    mode = gl.LINES; 
+    mode = gl.TRIANGLES; 
 
     resize_canvas();
     window.addEventListener("resize", resize_canvas);
@@ -124,6 +125,7 @@ function setup(shaders)
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     SPHERE.init(gl);
+    CYLINDER.init(gl);
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
     
     window.requestAnimationFrame(render);
@@ -148,8 +150,8 @@ function setup(shaders)
     function Tail(){
          // Don't forget to scale the sun, rotate it around the y axis at the correct speed
         //multRotationY(c++);
-        multTranslation([3.5, 0.65, 0]);
-        multScale([7, 0.5, 0.5]);
+        multTranslation([4, 0.65, 0]);
+        multScale([5.20, 0.75, 0.75]);
 
         // Send the current modelview matrix to the vertex shader
         uploadModelView();
@@ -162,7 +164,7 @@ function setup(shaders)
     function Helicopter()
     {
         // Don't forget to scale the sun, rotate it around the y axis at the correct speed
-        multScale([5, 2, 2]);     
+        multScale([5.56, 2.6, 2.6]);     
 
         // Send the current modelview matrix to the vertex shader
         uploadModelView();
@@ -172,8 +174,40 @@ function setup(shaders)
         
     }
 
+    function Barbatana(){
+     
+    
+        multRotationZ(-30);
+        multScale([0.75,1.5,0.75]);
+        
+        uploadModelView();
+
+        SPHERE.draw(gl, program, mode);
+    }
+
+    function EspigãoBack(){
+
+        multScale([.25,1,.25]);
+
+        uploadModelView();
+
+        CYLINDER.draw(gl,program,mode);
+    }
+
+    function Pa(xTrans){
+        
+        multTranslation([xTrans*0.6, 0.8, 0]);
+        multScale([1.2, 0.2, 0.2]);
+        
+        uploadModelView();
+
+        SPHERE.draw(gl, program, mode);
+    }
+
     function render()
     {
+
+        
         if(animation) time += speed;
         window.requestAnimationFrame(render);
 
@@ -191,6 +225,32 @@ function setup(shaders)
         popMatrix();
         pushMatrix();
             Tail();
+        popMatrix();
+        
+        pushMatrix();
+            pushMatrix();
+            multTranslation([6.60,1.1,0]);
+            pushMatrix();
+                Barbatana();
+            popMatrix();
+            pushMatrix();
+                multRotationX(90);
+                multRotationY(velHeli++);
+                pushMatrix();
+                multTranslation([0,0.6,0]);
+                    EspigãoBack();
+                popMatrix();
+                pushMatrix();
+                    
+                    pushMatrix();
+                        Pa(1);
+                    popMatrix();
+                    pushMatrix();
+                        Pa(-1);
+                    popMatrix();
+                popMatrix();
+
+            popMatrix();
         popMatrix();
     }
 }
