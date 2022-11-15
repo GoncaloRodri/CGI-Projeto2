@@ -1,0 +1,36 @@
+body, html {
+    height: 100%;
+}
+body {
+    /*display: flex;*/
+    margin: 0px;
+    overflow: hidden; /*  Disable scrollbars */
+    background-color: black;
+}
+
+.footer{
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0.5;
+    background-color: rgb(189, 114, 22);
+    color: white;
+    text-align: center;
+}
+
+.slider{
+    width: 80%;
+    height: 15px;
+    border-radius: 5px;  
+    background: #d3d3d3;
+}
+
+.inputSection{
+    height: auto;
+    width: 6cm;
+    float: left;
+    text-align: center;
+
+    border: 3px solid green;
+}
