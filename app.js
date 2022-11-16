@@ -265,23 +265,11 @@ function setup(shaders) {
         popMatrix();
     }
 
-    function leftConnector() {
+    function connector(i) {
         multTranslation([0, -0.2, 0]);
         multRotationX(-30);
-        multRotationZ(-30);
-        multTranslation([-2.5 / 2, 0, 0]);
-        multScale([1 / 5, 0.85, 1 / 5]);
-
-        uploadModelView();
-
-        CYLINDER.draw(gl, program, mode);
-    }
-
-    function rightConnector() {
-        multTranslation([0, -0.2, 0]);
-        multRotationX(-30);
-        multRotationZ(30);
-        multTranslation([2.5 / 2, 0, 0]);
+        multRotationZ(i*30);
+        multTranslation([i*2.5 / 2, 0, 0]);
         multScale([1 / 5, 0.85, 1 / 5]);
 
         uploadModelView();
@@ -303,20 +291,20 @@ function setup(shaders) {
             pushMatrix();
                 multTranslation([0, -1.5, 1.1]);
                 pushMatrix();
-                    leftConnector();
+                    connector(-1);
                 popMatrix();
                 pushMatrix();
-                    rightConnector();
+                    connector(1);
                 popMatrix();
                     skid();
             popMatrix();
                 multRotationY(180);
                 multTranslation([0, -1.5, 1.1]);
                 pushMatrix();
-                    leftConnector();
+                    connector(-1);
                 popMatrix();
                 pushMatrix();
-                    rightConnector();
+                    connector(1);
                 popMatrix();
                     skid();
         popMatrix();
