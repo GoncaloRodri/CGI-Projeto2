@@ -1,9 +1,11 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten } from "../../libs/MV.js";
+import { ortho, lookAt, flatten, mult, normalize, length, vec3} from "../../libs/MV.js";
 import {modelView, loadMatrix, multRotationY, multScale, multRotationX } from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/objects/sphere.js';
 import { multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
+
+import Stats from "../../libs/dat.gui.module.js";
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -40,6 +42,9 @@ let up = DEFAULT_UP;
 
 
 
+let xOz_radius = 135 * 2*Math.PI/360;
+
+let yOxz_radius = 45 * 2*Math.PI/360;
 
 
 function setup(shaders)
@@ -48,6 +53,7 @@ function setup(shaders)
     let aspect = canvas.width / canvas.height;
 
     gl = setupWebGL(canvas);
+       
 
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
@@ -66,10 +72,34 @@ function setup(shaders)
 
     document.getElementById("top").addEventListener("change", setTopView);
 
+    document.getElementById("rotCamY").addEventListener("input", function(event){
+
+        xOz_radius = (document.getElementById("rotCamY").value)*Math.PI*2/(360);
+    });
+
+    document.getElementById("rotCamX").addEventListener("input", function(event){
+
+        yOxz_radius = (document.getElementById("rotCamX").value)*Math.PI*2/(360);
+    });
+
+    function loadView(){
+
+        let r = VP_DISTANCE;
+
+        let a = r * Math.cos(yOxz_radius);
+
+        let x = a * Math.cos(xOz_radius);
+        let y = r * Math.sin(yOxz_radius);
+        let z = a * Math.sin(xOz_radius);
+
+        view = [x, y, z];
+    }
+
+
     function setAxonometricView(){
-        view = AXONOMETRIC_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+        let xOz_radius = 45 * 2*Math.PI/360;
+
+        let yOxz_radius = -45 * 2*Math.PI/360;
     }
 
     function setSideView(){
@@ -183,6 +213,9 @@ function setup(shaders)
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
     
+
+        loadView();
+
         loadMatrix(lookAt(view, at, up));
 
         
@@ -193,6 +226,8 @@ function setup(shaders)
             Tail();
         popMatrix();
     }
+
+    console.log(length([view[1]], view[2]));
 }
 
 const urls = ["shader.vert", "shader.frag"];
