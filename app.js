@@ -406,6 +406,7 @@ function setup(shaders) {
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, distancey, 0]);
+            multRotationY(90);
                 pushMatrix();
                     body();
                     skidPlusConnectors();
