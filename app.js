@@ -140,8 +140,8 @@ function setup(shaders) {
                 distancey--;
                 break;
             case 'ArrowLeft':
-                if(velocity <= 5)
-                    velocity++;
+                if(velocity <= 2)
+                    velocity += 0.1;
                 break;
         }
     }
@@ -380,6 +380,13 @@ function setup(shaders) {
         CUBE.draw(gl, program, mode);
     }
  
+    function printInfo(){
+        console.log("Velocity: " + velocity);
+        console.log("Is it Breaking: " + breaking);
+        console.log("Angle: " + (angle%360) );
+        console.log("Height: " + distancey);
+    }
+
     function render() {
         if (animation) time += speed;
         window.requestAnimationFrame(render);
@@ -392,10 +399,14 @@ function setup(shaders) {
 
         loadMatrix(lookAt(view, at, up));
 
+        printInfo();
+
         if(breaking) {
             velocity -= 0.1;
-            if(velocity <= 0)
+            if (velocity <= 0){
+                velocity = 0;
                 breaking = false;
+            }
         }
 
         angle += velocity;
@@ -407,6 +418,7 @@ function setup(shaders) {
             multRotationY(-angle);
             multTranslation([distancex, distancey, 0]);
             multRotationY(90);
+            multRotationZ(velocity * 10);
                 pushMatrix();
                     body();
                     skidPlusConnectors();
