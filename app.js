@@ -75,11 +75,42 @@ function setup(shaders)
     document.getElementById("rotCamY").addEventListener("input", function(event){
 
         xOz_radius = (document.getElementById("rotCamY").value)*Math.PI*2/(360);
+        let r = VP_DISTANCE;
+
+        let a = r * Math.cos(yOxz_radius);
+
+        let x = a * Math.cos(xOz_radius);
+        let y = r * Math.sin(yOxz_radius);
+        let z = a * Math.sin(xOz_radius);
+
+        console.log(xOz_radius / Math.PI / 2 * 360);
+        console.log(yOxz_radius / Math.PI / 2 * 360);
+        console.log(r);
+        console.log(a);
+        console.log(x);
+        console.log(y);
+        console.log(z);
     });
 
     document.getElementById("rotCamX").addEventListener("input", function(event){
 
         yOxz_radius = (document.getElementById("rotCamX").value)*Math.PI*2/(360);
+        let r = VP_DISTANCE;
+
+        let a = r * Math.cos(yOxz_radius);
+
+        let x = a * Math.cos(xOz_radius);
+        let y = r * Math.sin(yOxz_radius);
+        let z = a * Math.sin(xOz_radius);
+
+       
+        console.log(xOz_radius / Math.PI / 2 * 360);
+        console.log(yOxz_radius / Math.PI / 2 * 360);
+        console.log(r);
+        console.log(a);
+        console.log(x);
+        console.log(y);
+        console.log(z);
     });
 
     function loadView(){
@@ -97,9 +128,9 @@ function setup(shaders)
 
 
     function setAxonometricView(){
-        let xOz_radius = 45 * 2*Math.PI/360;
+        xOz_radius = 45 * 2*Math.PI/360;
 
-        let yOxz_radius = -45 * 2*Math.PI/360;
+        yOxz_radius = -45 * 2*Math.PI/360;
     }
 
     function setSideView(){
