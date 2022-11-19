@@ -6,6 +6,8 @@ import * as SPHERE from '../../libs/objects/sphere.js';
 
 import * as CYLINDER from '../../libs/objects/cylinder.js';
 
+import * as CUBE from '../../libs/objects/cube.js';
+
 /** @type WebGLRenderingContext */
 let gl;
 
@@ -20,7 +22,7 @@ const ORBIT_SCALE = 1 / 60;   // scale that will apply to each orbit around the 
 const HElI_BODY_XY = 1;
 const HElI_BODY_Z = 4;
 
-const VP_DISTANCE = 5;
+const VP_DISTANCE = 30;
 let c = 0;
 
 
@@ -41,7 +43,15 @@ let up = DEFAULT_UP;
 
 let velHeli = 120;
 
+let angle = 0;
 
+let distancey = 0;
+
+let distancex = 30;
+
+let velocity = 0;
+
+let breaking = false;
 
 function setup(shaders) {
     let canvas = document.getElementById("gl-canvas");
@@ -121,23 +131,31 @@ function setup(shaders) {
                 setTopView();
                 break;
             case 'Space':
-
+                dropBox();
                 break;
             case 'ArrowUp':
-
+                distancey++;
                 break;
             case 'ArrowDown':
-
+                distancey--;
                 break;
             case 'ArrowLeft':
-
+                if(velocity <= 5)
+                    velocity++;
                 break;
         }
+    }
+
+    document.onkeyup = function(event) {
+        if(event.key === "ArrowLeft")
+            breaking = true;
+        console.log(breaking);
     }
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     SPHERE.init(gl);
     CYLINDER.init(gl);
+    CUBE.init(gl);
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
 
     window.requestAnimationFrame(render);
@@ -155,6 +173,49 @@ function setup(shaders) {
 
     function uploadModelView() {
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
+    }
+
+    function building() {
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function cenary() {
+        pushMatrix();
+            multScale([10,20,10]);
+            building();
+        popMatrix();    
+        pushMatrix();
+            multTranslation([0,14,0]);
+            multScale([7,8,7]);
+            building();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,20,0]);
+            multScale([4,6,4]);
+            building();
+        popMatrix();
+        pushMatrix();
+            multTranslation([50,-3,0]);
+            multScale([5,14,5]);
+            building();
+        popMatrix();
+        pushMatrix();
+            multTranslation([-75,40,0]);
+            multScale([12,20,8]);
+            building();
+        popMatrix();
+        /*pushMatrix();
+            multTranslation([-65,45,5]);
+            multScale([8,20,8]);
+            building();
+        popMatrix();*/
+        pushMatrix();
+            multTranslation([-65,45,-8]);
+            multScale([16,20,8]);
+            building();
+        popMatrix();
     }
 
     function tailBody() {
@@ -310,6 +371,15 @@ function setup(shaders) {
         popMatrix();
     }
 
+    function dropBox() {
+        //multScale([5, 0.2, 0.2]);
+        multTranslation([0,0,-velHeli]);
+
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);
+    }
+ 
     function render() {
         if (animation) time += speed;
         window.requestAnimationFrame(render);
@@ -322,12 +392,24 @@ function setup(shaders) {
 
         loadMatrix(lookAt(view, at, up));
 
+        if(breaking) {
+            velocity -= 0.1;
+            if(velocity <= 0)
+                breaking = false;
+        }
 
-        body();
+        angle += velocity;
 
-        skidPlusConnectors();
-
-        topBlades(velHeli++);
+        pushMatrix();
+            cenary();
+        popMatrix();
+        pushMatrix();
+            multRotationY(-angle);
+            multTranslation([distancex, distancey, 0]);
+                pushMatrix();
+                    body();
+                    skidPlusConnectors();
+                    topBlades(velHeli++);
     }
 }
 
