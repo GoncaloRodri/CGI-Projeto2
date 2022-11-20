@@ -1,6 +1,7 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
 import { ortho, lookAt, flatten } from "../../libs/MV.js";
 import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
+import {vec3} from "../../libs/MV.js";
 
 import * as SPHERE from '../../libs/objects/sphere.js';
 
@@ -131,7 +132,7 @@ function setup(shaders) {
                 setTopView();
                 break;
             case 'Space':
-                dropBox();
+                //dropBox();
                 break;
             case 'ArrowUp':
                 distancey++;
@@ -175,50 +176,122 @@ function setup(shaders) {
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
-    function building() {
+    function buildingParts() {
+        red();
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function yellow() {
+        let yellow = vec3(0.94,0.9,0.55);
+        let yelloww = vec3(0.94,0.95,0.55);
+        let yellowww = vec3(0.90,0.97,0.55);
+        let yellowwww = vec3(0.98,0.92,0.59);
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor2 = gl.getUniformLocation(program, "uColor2");
+        const uColor3 = gl.getUniformLocation(program, "uColor3");
+        const uColor4 = gl.getUniformLocation(program, "uColor4");
+        gl.uniform3fv(uColor1, yellow);
+        gl.uniform3fv(uColor2, yelloww);
+        gl.uniform3fv(uColor3, yellowww);
+        gl.uniform3fv(uColor4, yellowwww);
+    }
+
+    function red() {
+        let yellow = vec3(0.94,0,0);
+        gl.useProgram(program);
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, yellow);
+    }
+
+    function greenTroops() {
+        let yellow = vec3(0.34,0.42,0.18);
+        gl.useProgram(program);
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, yellow);
+    }
+
+  /*  function window() {
+        let yellow = vec3(0.94,0.9,0.55);
+        gl.useProgram(program);
+        const uColor = gl.getUniformLocation(program, "uColor");
+        gl.uniform3fv(uColor, yellow);
+       // multScale([0.5,1,0.5]);
+        uploadModelView();
+        CUBE.draw(gl, program, mode);
+    }*/
+
+    function buildings() {
+        //start of central building
+        pushMatrix();
+            multScale([10,20,10]);
+            buildingParts();
+          /*  pushMatrix();  //janelas
+                multTranslation([15,0,15]);
+                window();
+            popMatrix();*/
+        popMatrix();    
+        pushMatrix();
+            multTranslation([0,14,0]);
+            multScale([7,8,7]);
+            buildingParts();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,20,0]);
+            multScale([4,6,4]);
+            buildingParts();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,20,0]);
+            multScale([4,6,4]);
+            buildingParts();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,25,0]);
+            multScale([1.5,10,1.5]);
+            buildingParts();
+        popMatrix();
+        //end of central building
+        pushMatrix();
+            multTranslation([50,-3,0]);
+            multScale([5,14,5]);
+            buildingParts();
+        popMatrix();
+        pushMatrix();
+            multTranslation([-75,40,0]);
+            multScale([12,20,8]);
+            buildingParts();
+        popMatrix();
+        /*pushMatrix();
+            multTranslation([-65,45,5]);
+            multScale([8,20,8]);
+            buildingParts();
+        popMatrix();*/
+        pushMatrix();
+            multTranslation([-65,45,-8]);
+            multScale([16,20,8]);
+            buildingParts();
+        popMatrix();
+    }
+
+    function floor() {
+        yellow();
+        multScale([120,0.25,120]);
+
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
     }
 
     function cenary() {
-        pushMatrix();
-            multScale([10,20,10]);
-            building();
-        popMatrix();    
-        pushMatrix();
-            multTranslation([0,14,0]);
-            multScale([7,8,7]);
-            building();
-        popMatrix();
-        pushMatrix();
-            multTranslation([0,20,0]);
-            multScale([4,6,4]);
-            building();
-        popMatrix();
-        pushMatrix();
-            multTranslation([50,-3,0]);
-            multScale([5,14,5]);
-            building();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-75,40,0]);
-            multScale([12,20,8]);
-            building();
-        popMatrix();
-        /*pushMatrix();
-            multTranslation([-65,45,5]);
-            multScale([8,20,8]);
-            building();
-        popMatrix();*/
-        pushMatrix();
-            multTranslation([-65,45,-8]);
-            multScale([16,20,8]);
-            building();
-        popMatrix();
+        buildings();
+        floor()
     }
 
     function tailBody() {
+        greenTroops();
         multTranslation([4, 0.65, 0]);
         multScale([5.20, 0.75, 0.75]);
 
@@ -228,6 +301,7 @@ function setup(shaders) {
     }
 
     function cockpit() {
+        greenTroops();
         multScale([5.56, 2.6, 2.6]);
 
         uploadModelView();
@@ -236,6 +310,7 @@ function setup(shaders) {
     }
 
     function tailSkid() {
+        greenTroops();
         multRotationZ(-20);
         multScale([0.75, 1.5, 0.75]);
 
@@ -245,6 +320,7 @@ function setup(shaders) {
     }
 
     function tailRotor() {
+        greenTroops();
         multScale([.25, 1, .25]);
 
         uploadModelView();
@@ -253,6 +329,7 @@ function setup(shaders) {
     }
 
     function tailBlades(xTrans) {
+        greenTroops();
         multTranslation([xTrans * 0.6, 0.8, 0]);
         multScale([1, 0.2, 0.2]);
 
@@ -288,6 +365,7 @@ function setup(shaders) {
     }
 
     function topRotor() {
+        greenTroops();
         multScale([0.2, 1.3, 0.2]);
 
         uploadModelView();
@@ -296,6 +374,7 @@ function setup(shaders) {
     }
 
     function blade() {
+        greenTroops();
         multTranslation([2.5, 0.35, 0]);
         multScale([5, 0.2, 0.5]);
 
@@ -327,6 +406,7 @@ function setup(shaders) {
     }
 
     function connector(i) {
+        greenTroops();
         multTranslation([0, -0.2, 0]);
         multRotationX(-30);
         multRotationZ(i*30);
@@ -339,6 +419,7 @@ function setup(shaders) {
     }
 
     function skid() {
+        greenTroops();
         multScale([5, 0.2, 0.2]);
         multRotationZ(90);
 
@@ -371,14 +452,14 @@ function setup(shaders) {
         popMatrix();
     }
 
-    function dropBox() {
+   /* function dropBox() {
         //multScale([5, 0.2, 0.2]);
         multTranslation([0,0,-velHeli]);
 
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
-    }
+    }*/
  
     function render() {
         if (animation) time += speed;
@@ -406,10 +487,10 @@ function setup(shaders) {
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, distancey, 0]);
-                pushMatrix();
-                    body();
-                    skidPlusConnectors();
-                    topBlades(velHeli++);
+            pushMatrix();
+                body();
+                skidPlusConnectors();
+                topBlades(velHeli++);
     }
 }
 
