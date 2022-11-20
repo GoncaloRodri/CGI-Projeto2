@@ -455,7 +455,7 @@ function setup(shaders) {
         popMatrix();
     }
 
-   /* function dropBox() {
+    function dropBox() {
         //multScale([5, 0.2, 0.2]);
         multTranslation([0,0,-bladesSpeed]);
 
