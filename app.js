@@ -16,16 +16,16 @@ let speed = 1 / 60.0;     // Speed (how many days added to time on each render p
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
-const PLANET_SCALE = 10;    // scale that will apply to each planet and satellite
-const ORBIT_SCALE = 1 / 60;   // scale that will apply to each orbit around the sun
-
-const HElI_BODY_XY = 1;
-const HElI_BODY_Z = 4;
-
-const VP_DISTANCE = 30;
-let c = 0;
 
 
+const VP_DISTANCE = 60;
+
+const ACELARATION = 1.2;
+const DECELARATION = 1.1;
+const MAX_VELOCITY = 1;
+const BLADE_SPEED = 10;
+const MAX_HEIGHT = 20;
+const HEIGHT_RATIO = 0.5;
 const AXONOMETRIC_VIEW = [-VP_DISTANCE, VP_DISTANCE, VP_DISTANCE];
 const FRONT_VIEW = [-VP_DISTANCE, 0, 0];
 const SIDE_VIEW = [0, 0, VP_DISTANCE];
@@ -34,24 +34,26 @@ const DEFAULT_UP = [0, 1, 0];
 const TOP_UP = [1, 0, 0];
 const DEFAULT_AT = [0, 0, 0];
 const TOP_AT = [0, -1, 0];
+const MAX_BLADE_SPEED = 300;
+const MAX_TILT = 30;
+const STARTING_HEIGHT = 10;
+const MOVEMENT_RADIUS = 30;
+const STARTING_POSITION = 90;
 
 let view = AXONOMETRIC_VIEW;
-
 let at = DEFAULT_AT;
-
 let up = DEFAULT_UP;
+let bladesSpeed = BLADE_SPEED;
 
-let velHeli = 120;
-
-let angle = 0;
-
-let distancey = 0;
-
-let distancex = 30;
-
+let angle = STARTING_POSITION;
+let distancey = STARTING_HEIGHT;
+let distancex = MOVEMENT_RADIUS;
 let velocity = 0;
-
 let breaking = false;
+let heli_tilt = 0;
+let blade_angle = 0;
+let lastVelocity = velocity;
+
 
 function setup(shaders) {
     let canvas = document.getElementById("gl-canvas");
@@ -111,13 +113,7 @@ function setup(shaders) {
                 break;
             case 'p':
                 animation = !animation;
-                break;
-            case '+':
-                if (animation) speed *= 1.1;
-                break;
-            case '-':
-                if (animation) speed /= 1.1;
-                break;
+                break;  
             case '1':
                 setAxonometricView();
                 break;
@@ -134,22 +130,29 @@ function setup(shaders) {
                 dropBox();
                 break;
             case 'ArrowUp':
-                distancey++;
+                if(distancey < MAX_HEIGHT)
+                    distancey += HEIGHT_RATIO;
                 break;
             case 'ArrowDown':
-                distancey--;
+                if (distancey >= HEIGHT_RATIO)
+                    distancey -= HEIGHT_RATIO;
                 break;
             case 'ArrowLeft':
-                if(velocity <= 2)
-                    velocity += 0.1;
+                if(velocity <= MAX_VELOCITY && distancey > 0){
+                    if(velocity == 0) velocity = 0.10;
+                    if(velocity*ACELARATION > MAX_VELOCITY) 
+                        velocity = MAX_VELOCITY;
+                    else
+                        velocity *= ACELARATION;
+                }
                 break;
+                
         }
     }
 
     document.onkeyup = function(event) {
         if(event.key === "ArrowLeft")
             breaking = true;
-        console.log(breaking);
     }
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -261,7 +264,7 @@ function setup(shaders) {
         SPHERE.draw(gl, program, mode);
     }
 
-    function body() {
+    function body(velHeli) {
         pushMatrix();
             cockpit();
         popMatrix();
@@ -275,7 +278,7 @@ function setup(shaders) {
                     tailSkid();
                 popMatrix();
                     multRotationX(90);
-                    multRotationY(velHeli++);
+                    multRotationY(2*velHeli);
                     pushMatrix();
                         multTranslation([0, 0.4, 0]);
                         tailRotor();
@@ -373,18 +376,81 @@ function setup(shaders) {
 
     function dropBox() {
         //multScale([5, 0.2, 0.2]);
-        multTranslation([0,0,-velHeli]);
+        multTranslation([0,0,-bladesSpeed]);
 
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
     }
- 
+
+
     function printInfo(){
         console.log("Velocity: " + velocity);
         console.log("Is it Breaking: " + breaking);
         console.log("Angle: " + (angle%360) );
+        console.log("Tilt: " + (heli_tilt) );
         console.log("Height: " + distancey);
+        console.log("Blades Speed: " + bladesSpeed );
+    }
+
+    //in every call in render(), updates the blade's speed and angle
+    function setBladesSpeed(){
+        let dif_vel = lastVelocity - velocity;
+        if(velocity == 0){
+            if(distancey <= 0 && heli_tilt == 0){
+                if(bladesSpeed < 0.0001) bladesSpeed = 0;
+                bladesSpeed = bladesSpeed/1.1;
+            } else {
+                if(bladesSpeed < BLADE_SPEED){
+                    if(bladesSpeed < 1) bladesSpeed = 1;
+                    bladesSpeed *= 1.05; 
+                }
+                if(bladesSpeed > BLADE_SPEED) bladesSpeed = BLADE_SPEED;
+            }
+        } else { 
+            if(bladesSpeed < MAX_BLADE_SPEED){
+                    bladesSpeed += BLADE_SPEED*(-dif_vel);
+            } else {
+                    bladesSpeed = MAX_BLADE_SPEED;
+            }
+        }
+    }
+
+    //updates the velocity of helicopter and the tilting angle
+    function updateParameters() {
+        if(breaking) {
+            velocity /= 1.1;
+            if (velocity <= 0.001){
+                velocity = 0;
+                breaking = false;
+            }
+        }
+        setBladesSpeed();
+        
+        heli_tilt = velocity * MAX_TILT/MAX_VELOCITY;  // MAX_VELOCITY = 2 => MAX_ANGLE = 30;
+        angle += velocity;
+        blade_angle += bladesSpeed; 
+
+        lastVelocity = velocity;
+    }
+
+
+    function renderInstances(){
+        pushMatrix();
+            cenary();
+        popMatrix();
+        pushMatrix();
+            multRotationY(-angle);
+            multTranslation([distancex, 0, 0]);
+            multRotationY(90);
+                pushMatrix();
+                    //rotation done on the down front Zaxis of the helicopter to garantee that it dont rotate into the ground
+                    multTranslation([-5.56/2,-1.5 + distancey,0]);
+                    multRotationZ(heli_tilt);
+                    multTranslation([5.56/2,1.5,0]);
+                    body((blade_angle));
+                    skidPlusConnectors();
+                    topBlades((blade_angle));
     }
 
     function render() {
@@ -401,28 +467,9 @@ function setup(shaders) {
 
         printInfo();
 
-        if(breaking) {
-            velocity -= 0.1;
-            if (velocity <= 0){
-                velocity = 0;
-                breaking = false;
-            }
-        }
+        updateParameters();
 
-        angle += velocity;
-
-        pushMatrix();
-            cenary();
-        popMatrix();
-        pushMatrix();
-            multRotationY(-angle);
-            multTranslation([distancex, distancey, 0]);
-            multRotationY(90);
-            multRotationZ(velocity * 10);
-                pushMatrix();
-                    body();
-                    skidPlusConnectors();
-                    topBlades(velHeli++);
+        renderInstances();
     }
 }
 
