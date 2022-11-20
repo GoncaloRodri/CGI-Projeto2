@@ -40,6 +40,7 @@ const MAX_TILT = 30;
 const STARTING_HEIGHT = 10;
 const MOVEMENT_RADIUS = 30;
 const STARTING_POSITION = 90;
+const BOX_LIFETIME = 15;
 
 let view = AXONOMETRIC_VIEW;
 let at = DEFAULT_AT;
@@ -54,6 +55,9 @@ let breaking = false;
 let heli_tilt = 0;
 let blade_angle = 0;
 let lastVelocity = velocity;
+let fallSpeed = 10/VP_DISTANCE;
+
+let boxes = [];
 
 
 function setup(shaders) {
@@ -127,8 +131,9 @@ function setup(shaders) {
             case '4':
                 setTopView();
                 break;
-            case 'Space':
-                //dropBox();
+            case ' ':
+                console.log("boxe draw!")
+                boxes.push([distancey-2, BOX_LIFETIME, angle, velocity]);
                 break;
             case 'ArrowUp':
                 if(distancey < MAX_HEIGHT)
@@ -314,7 +319,7 @@ function setup(shaders) {
 
     function tailSkid() {
         greenTroops();
-        multRotationZ(-20);
+        multRotationZ(-25);
         multScale([0.75, 1.5, 0.75]);
 
         uploadModelView();
@@ -455,10 +460,21 @@ function setup(shaders) {
         popMatrix();
     }
 
-    function dropBox() {
+    function dropBox(box) {
         //multScale([5, 0.2, 0.2]);
-        multTranslation([0,0,-bladesSpeed]);
-
+        console.log("Drop box started!")
+        console.log("Box.1 = " + box[0] + "; Box.2 = " + box[1] + ";" );
+        multScale([1.5,1.5,1.5])
+        if(box[0] > 0) {
+            if(box[0] - 1 < 0) box[0] = 0;
+            else box[0] -=  0.5;
+            multTranslation([0,box[0]+ 1.5/2 + 0.25,0]);
+        } else {
+            box[1]--;
+            if(box[1] <= 0)
+                boxes.splice(boxes.indexOf(box),1);
+        }
+        
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
@@ -521,18 +537,37 @@ function setup(shaders) {
             cenary();
         popMatrix();
         pushMatrix();
+        boxes.forEach(box => {
+            pushMatrix();
+            console.log("box " + box);
+            
+            if(box[0] > 0 ) box[2] += velocity; 
+            multRotationY(-box[2]);
+            pushMatrix();     
+            multTranslation([distancex, 0, 0]);
+                dropBox(box);
+            popMatrix();
+            popMatrix();
+        });
+            
+        
+            popMatrix();
+            pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, 0, 0]);
+           
             multRotationY(90);
                 pushMatrix();
-                    //rotation done on the down front Zaxis of the helicopter to garantee that it dont rotate into the ground
-                    multTranslation([-5.56/2,-1.5 + distancey,0]);
+                    //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
+                    multTranslation([-5.56/2,distancey+0.25,0]);
                     multRotationZ(heli_tilt);
                     multTranslation([5.56/2,1.5,0]);
                     body((blade_angle));
                     skidPlusConnectors();
                     topBlades((blade_angle));
-    }
+              
+
+            }
 
     function render() {
         if (animation) time += speed;
