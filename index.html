@@ -12,11 +12,10 @@
         <div class="footer" >
 
             <section class="inputSection">
-                <form oninput="out.value = rotCamX.value">
+                <form oninput="out.innerHTML= rotCamX.value">
                     <label for="rotCamX"> Rotate Camera: X </label> 
                     <input type="range" value="135" min="0" max="90" class="slider" id="rotCamX">
-                    <br> 
-                    <p id="out">123</p>
+                    <a id="out">123</a>
                 </form>
             </section> 
             <section class="inputSection">

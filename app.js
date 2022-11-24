@@ -4,6 +4,7 @@ import { ortho, lookAt, flatten, mult, normalize, length, vec3, mat4, vec4, inve
 
 import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
 
+import * as dat from "../../libs/dat.gui.module.js";
 
 import * as SPHERE from '../../libs/objects/sphere.js';
 
@@ -40,11 +41,11 @@ const BOX_LIFETIME = 15;
 const v = mat4(
     vec4(1,0,0,0),
     vec4(0,1,0,0), 
-    vec4(0,0,0,0), 
+    vec4(0,0,1,0), 
     vec4(0,0,0,1)
     );
 
-let xAngle = 45* 2*Math.PI/360;
+let xAngle = 30* 2*Math.PI/360;
 let yAngle = 45* 2*Math.PI/360;
 
 let mView = v;
@@ -80,6 +81,28 @@ function setup(shaders) {
     mode = gl.TRIANGLES;
 
     resize_canvas();
+
+    let effectController;
+    init_axo_cam();
+
+    function init_axo_cam() {
+
+        effectController = {
+            theta: 40.0,
+            gamma: 45.0,
+            dummy: function() {}
+          };
+
+        const gui = new dat.GUI();
+
+        let folder;
+        folder = gui.addFolder('Controls');
+
+        folder.add(effectController, 'theta', 0, 90, 1);
+        console.log(effectController.theta);
+        folder.add(effectController, 'gamma', 0, 180, 1);
+
+        }
 
     window.addEventListener("resize", resize_canvas);
 
@@ -149,7 +172,7 @@ function setup(shaders) {
                 setTopView();
                 break;
             case ' ':
-                console.log("boxe draw!")
+                //console.log("time is:" + time)
                 boxes.push([distancey-2, time+5, angle, velocity]);
                 break;
             case 'ArrowUp':
@@ -463,9 +486,10 @@ function setup(shaders) {
         multScale([1.5,1.5,1.5])
         if(box[0] > 0) {
             if(box[0] - 1 < 0) box[0] = 0;
-            else box[0] -=  0.5;
-            multTranslation([0,box[0]+ 1.5/2 + 0.25,0]);
+            else box[0] -= 0.11;
+            multTranslation([0,box[0] + 0.25,0]);
         } else {
+            //console.log("hit the floor at: " + time);
             if(box[1] <= time)
                 boxes.splice(boxes.indexOf(box),1);
         }
@@ -477,19 +501,19 @@ function setup(shaders) {
 
     function loadRotationX(){
         return mat4(
-            vec4(1,0,0,0), 
-            vec4(0, Math.cos(xAngle), -Math.sin(xAngle),0),
-            vec4(Math.sin(xAngle),0,Math.cos(xAngle),0), 
-            vec4(0,0,0,1)
+            vec4(1, 0, 0, 0), 
+            vec4(0, Math.cos(xAngle), -Math.sin(xAngle), 0),
+            vec4(Math.sin(xAngle), 0, Math.cos(xAngle), 0), 
+            vec4(0, 0, 0 , 1)
             );
     }
 
     function loadRotationY(){
         return mat4(
-            vec4(Math.cos(yAngle),0,Math.sin(yAngle),0),
-            vec4(0,1,0,0), 
-            vec4(-Math.sin(yAngle),0,Math.cos(yAngle),0), 
-            vec4(0,0,0,1)
+            vec4(Math.cos(yAngle), 0, Math.sin(yAngle), 0),
+            vec4(0, 1, 0, 0), 
+            vec4(-Math.sin(yAngle), 0, Math.cos(yAngle), 0), 
+            vec4(0, 0, 0, 1)
             );
     }
 
@@ -545,7 +569,10 @@ function setup(shaders) {
 
 
     function renderInstances(){
-        
+
+        pushMatrix();
+            cenary();
+        popMatrix();
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, 0, 0]);
@@ -574,9 +601,7 @@ function setup(shaders) {
             popMatrix();
             popMatrix();
         });
-        pushMatrix();
-            cenary();
-        popMatrix();
+        
         popMatrix();
         
             
