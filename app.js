@@ -124,10 +124,6 @@ function setup(shaders) {
     }
 
 
-    document.onkeydown = function(event) {
-        switch(event.key) {
-
-
     document.onkeydown = function (event) {
         switch (event.key) {
 
@@ -166,7 +162,7 @@ function setup(shaders) {
                 break;
             case 'ArrowLeft':
                 if(velocity <= MAX_VELOCITY && distancey > 0){
-                    if(velocity == 0) velocity = 0.10;
+                    if(velocity <= 0) velocity = 0.10;
                     if(velocity*ACELARATION > MAX_VELOCITY) 
                         velocity = MAX_VELOCITY;
                     else
@@ -575,7 +571,19 @@ function setup(shaders) {
 
     function renderInstances(){
         pushMatrix();
-            cenary();
+            multRotationY(-angle);
+            multTranslation([distancex, 0, 0]);
+           
+            multRotationY(90);
+                pushMatrix();
+                    //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
+                    multTranslation([-5.56/2,distancey+0.25,0]);
+                    multRotationZ(heli_tilt);
+                    multTranslation([5.56/2,1.5,0]);
+                    body((blade_angle));
+                    skidPlusConnectors();
+                    topBlades((blade_angle));
+            popMatrix();
         popMatrix();
         pushMatrix();
         boxes.forEach(box => {
@@ -590,25 +598,16 @@ function setup(shaders) {
             popMatrix();
             popMatrix();
         });
-            
+        pushMatrix();
+            cenary();
+        popMatrix();
         
+            
             popMatrix();
-            pushMatrix();
-            multRotationY(-angle);
-            multTranslation([distancex, 0, 0]);
-           
-            multRotationY(90);
-                pushMatrix();
-                    //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
-                    multTranslation([-5.56/2,distancey+0.25,0]);
-                    multRotationZ(heli_tilt);
-                    multTranslation([5.56/2,1.5,0]);
-                    body((blade_angle));
-                    skidPlusConnectors();
-                    topBlades((blade_angle));
+            
               
 
-            }
+    }
 
     function render() {
         if (animation) time += speed;
