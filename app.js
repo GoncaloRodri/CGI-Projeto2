@@ -150,7 +150,7 @@ function setup(shaders) {
                 break;
             case ' ':
                 console.log("boxe draw!")
-                boxes.push([distancey-2, BOX_LIFETIME, angle, velocity]);
+                boxes.push([distancey-2, time+5, angle, velocity]);
                 break;
             case 'ArrowUp':
                 if(distancey < MAX_HEIGHT)
@@ -162,6 +162,7 @@ function setup(shaders) {
                 break;
             case 'ArrowLeft':
                 if(velocity <= MAX_VELOCITY && distancey > 0){
+                    breaking = false;
                     if(velocity <= 0) velocity = 0.10;
                     if(velocity*ACELARATION > MAX_VELOCITY) 
                         velocity = MAX_VELOCITY;
@@ -238,25 +239,11 @@ function setup(shaders) {
         gl.uniform3fv(uColor, yellow);
     }
 
-  /*  function window() {
-        let yellow = vec3(0.94,0.9,0.55);
-        gl.useProgram(program);
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, yellow);
-       // multScale([0.5,1,0.5]);
-        uploadModelView();
-        CUBE.draw(gl, program, mode);
-    }*/
-
     function buildings() {
         //start of central building
         pushMatrix();
             multScale([10,20,10]);
             buildingParts();
-          /*  pushMatrix();  //janelas
-                multTranslation([15,0,15]);
-                window();
-            popMatrix();*/
         popMatrix();    
         pushMatrix();
             multTranslation([0,14,0]);
@@ -289,11 +276,6 @@ function setup(shaders) {
             multScale([12,20,8]);
             buildingParts();
         popMatrix();
-        /*pushMatrix();
-            multTranslation([-65,45,5]);
-            multScale([8,20,8]);
-            buildingParts();
-        popMatrix();*/
         pushMatrix();
             multTranslation([-65,45,-8]);
             multScale([16,20,8]);
@@ -478,17 +460,13 @@ function setup(shaders) {
     }
 
     function dropBox(box) {
-        //multScale([5, 0.2, 0.2]);
-        console.log("Drop box started!")
-        console.log("Box.1 = " + box[0] + "; Box.2 = " + box[1] + ";" );
         multScale([1.5,1.5,1.5])
         if(box[0] > 0) {
             if(box[0] - 1 < 0) box[0] = 0;
             else box[0] -=  0.5;
             multTranslation([0,box[0]+ 1.5/2 + 0.25,0]);
         } else {
-            box[1]--;
-            if(box[1] <= 0)
+            if(box[1] <= time)
                 boxes.splice(boxes.indexOf(box),1);
         }
         
@@ -496,8 +474,6 @@ function setup(shaders) {
 
         CUBE.draw(gl, program, mode);
     }
-
-
 
     function loadRotationX(){
         return mat4(
@@ -517,7 +493,6 @@ function setup(shaders) {
             );
     }
 
-   
     function printInfo(){
         console.log("Velocity: " + velocity);
         console.log("Is it Breaking: " + breaking);
@@ -570,6 +545,7 @@ function setup(shaders) {
 
 
     function renderInstances(){
+        
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, 0, 0]);
@@ -601,9 +577,8 @@ function setup(shaders) {
         pushMatrix();
             cenary();
         popMatrix();
+        popMatrix();
         
-            
-            popMatrix();
             
               
 
@@ -612,6 +587,7 @@ function setup(shaders) {
     function render() {
         if (animation) time += speed;
 
+        console.log(time);
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -624,7 +600,7 @@ function setup(shaders) {
         
         loadMatrix(mView);
         
-        printInfo();
+        //printInfo();
 
         updateParameters();
 
