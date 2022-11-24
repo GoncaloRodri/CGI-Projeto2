@@ -11,17 +11,17 @@
         </canvas>
         <div class="footer" >
             <section class="inputSection">
-                <form onclick="out.value = rotCamX.value">
+                <form oninput="out.value = rotCamX.value">
                     <label for="rotCamX"> Rotate Camera: X </label> 
-                    <input type="range" value="135" min="1" max="360" class="slider" id="rotCamX">
+                    <input type="range" value="135" min="0" max="360" class="slider" id="rotCamX">
                     <br> 
-                    <output value ="135" id="out"></output>
+                    <p id="out">123</p>
                 </form>
             </section> 
             <section class="inputSection">
-                <form onclick="out2.value = rotCamY.value">
+                <form oninput="out2.value = rotCamY.value">
                     <label for="rotCamY"> Rotate Camera: Y </label> 
-                    <input type="range" value="45" min="1" max="360" class="slider" id="rotCamY">
+                    <input type="range" value="45" min="0" max="360" class="slider" id="rotCamY">
                     <br> 
                     <output value ="45" id="out2"></output>
                 </form>
