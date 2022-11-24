@@ -12,14 +12,21 @@
         <div class="footer" >
 
             <section class="inputSection">
-                <form oninput="output.value = SomethingSlider.value">
-                    <label for="SomethingSlider">velocity</label> 
-                    <input type="range" value="50" min="0" max="100" class="slider" id="SomethingSlider">
-                    <br>
-                    value =  <output id="output" value="0"></output> 
+                <form oninput="out.value = rotCamX.value">
+                    <label for="rotCamX"> Rotate Camera: X </label> 
+                    <input type="range" value="135" min="0" max="360" class="slider" id="rotCamX">
+                    <br> 
+                    <p id="out">123</p>
+                </form>
+            </section> 
+            <section class="inputSection">
+                <form oninput="out2.value = rotCamY.value">
+                    <label for="rotCamY"> Rotate Camera: Y </label> 
+                    <input type="range" value="45" min="0" max="360" class="slider" id="rotCamY">
+                    <br> 
+                    <output value ="45" id="out2"></output>
                 </form>
             </section>
-
             <section class="selectSection">
                 <form id="viewForm" >
                     <input type="radio" name="view" id="axonometric" >

@@ -1,7 +1,9 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten } from "../../libs/MV.js";
+
+import { ortho, lookAt, flatten, mult, normalize, length, vec3, mat4, vec4, inverse, printm} from "../../libs/MV.js";
+
 import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
-import {vec3} from "../../libs/MV.js";
+
 
 import * as SPHERE from '../../libs/objects/sphere.js';
 
@@ -18,7 +20,6 @@ let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
 
-
 const VP_DISTANCE = 60;
 
 const ACELARATION = 1.2;
@@ -27,14 +28,6 @@ const MAX_VELOCITY = 1;
 const BLADE_SPEED = 10;
 const MAX_HEIGHT = 20;
 const HEIGHT_RATIO = 0.5;
-const AXONOMETRIC_VIEW = [-VP_DISTANCE, VP_DISTANCE, VP_DISTANCE];
-const FRONT_VIEW = [-VP_DISTANCE, 0, 0];
-const SIDE_VIEW = [0, 0, VP_DISTANCE];
-const TOP_VIEW = [0, 0, 0];
-const DEFAULT_UP = [0, 1, 0];
-const TOP_UP = [1, 0, 0];
-const DEFAULT_AT = [0, 0, 0];
-const TOP_AT = [0, -1, 0];
 const MAX_BLADE_SPEED = 300;
 const MAX_TILT = 30;
 const STARTING_HEIGHT = 10;
@@ -42,10 +35,23 @@ const MOVEMENT_RADIUS = 30;
 const STARTING_POSITION = 90;
 const BOX_LIFETIME = 15;
 
-let view = AXONOMETRIC_VIEW;
-let at = DEFAULT_AT;
-let up = DEFAULT_UP;
+
+
+const v = mat4(
+    vec4(1,0,0,0),
+    vec4(0,1,0,0), 
+    vec4(0,0,0,0), 
+    vec4(0,0,0,1)
+    );
+
+let xAngle = 45* 2*Math.PI/360;
+let yAngle = 45* 2*Math.PI/360;
+
+let mView = v;
+
+
 let bladesSpeed = BLADE_SPEED;
+
 
 let angle = STARTING_POSITION;
 let distancey = STARTING_HEIGHT;
@@ -65,6 +71,7 @@ function setup(shaders) {
     let aspect = canvas.width / canvas.height;
 
     gl = setupWebGL(canvas);
+    
 
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
@@ -84,32 +91,46 @@ function setup(shaders) {
 
     document.getElementById("top").addEventListener("change", setTopView);
 
-    function setAxonometricView() {
-        view = AXONOMETRIC_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+
+    document.getElementById("rotCamY").addEventListener("input", function(event){
+        yAngle = (document.getElementById("rotCamY").value)*Math.PI*2/(360);
+
+    });
+
+    document.getElementById("rotCamX").addEventListener("input", function(event){
+        xAngle = (document.getElementById("rotCamX").value)*Math.PI*2/(360);
+    });
+
+
+
+    function setAxonometricView(){
+        xAngle = 45 * Math.PI*2 /360;
+        yAngle = 45 * Math.PI*2 /360;
     }
 
-    function setSideView() {
-        view = SIDE_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+    function setSideView(){
+        xAngle = 0;
+        yAngle = 0;
     }
 
-    function setFrontView() {
-        view = FRONT_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+    function setFrontView(){
+        xAngle = 0;
+        yAngle = 90 *Math.PI*2 /360;        
     }
 
-    function setTopView() {
-        view = TOP_VIEW;
-        up = TOP_UP;
-        at = TOP_AT;
+    function setTopView(){
+        xAngle = 90 *Math.PI*2 /360;
+        yAngle = 90 *Math.PI*2 /360;
     }
+
+
+    document.onkeydown = function(event) {
+        switch(event.key) {
+
 
     document.onkeydown = function (event) {
         switch (event.key) {
+
             case 'w':
                 mode = gl.LINES;
                 break;
@@ -481,6 +502,26 @@ function setup(shaders) {
     }
 
 
+
+    function loadRotationX(){
+        return mat4(
+            vec4(1,0,0,0), 
+            vec4(0, Math.cos(xAngle), -Math.sin(xAngle),0),
+            vec4(Math.sin(xAngle),0,Math.cos(xAngle),0), 
+            vec4(0,0,0,1)
+            );
+    }
+
+    function loadRotationY(){
+        return mat4(
+            vec4(Math.cos(yAngle),0,Math.sin(yAngle),0),
+            vec4(0,1,0,0), 
+            vec4(-Math.sin(yAngle),0,Math.cos(yAngle),0), 
+            vec4(0,0,0,1)
+            );
+    }
+
+   
     function printInfo(){
         console.log("Velocity: " + velocity);
         console.log("Is it Breaking: " + breaking);
@@ -571,6 +612,7 @@ function setup(shaders) {
 
     function render() {
         if (animation) time += speed;
+
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -578,15 +620,18 @@ function setup(shaders) {
         gl.useProgram(program);
 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
-
-        loadMatrix(lookAt(view, at, up));
-
+    
+        mView = mult(mult(v, loadRotationX()), loadRotationY());
+        
+        loadMatrix(mView);
+        
         printInfo();
 
         updateParameters();
 
         renderInstances();
     }
+
 }
 
 const urls = ["shader.vert", "shader.frag"];
