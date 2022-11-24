@@ -8,6 +8,9 @@ import * as SPHERE from '../../libs/objects/sphere.js';
 import * as CYLINDER from '../../libs/objects/cylinder.js';
 
 import * as CUBE from '../../libs/objects/cube.js';
+import { mult } from "./libs/MV.js";
+
+import * as PYRAMID from '../../libs/objects/pyramid.js';
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -17,6 +20,7 @@ let speed = 1 / 60.0;     // Speed (how many days added to time on each render p
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
+let trees = []; 
 
 
 const VP_DISTANCE = 60;
@@ -160,6 +164,7 @@ function setup(shaders) {
     SPHERE.init(gl);
     CYLINDER.init(gl);
     CUBE.init(gl);
+    PYRAMID.init(gl);
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
 
     window.requestAnimationFrame(render);
@@ -179,108 +184,317 @@ function setup(shaders) {
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
-    function buildingParts() {
-        red();
-        uploadModelView();
-
-        CUBE.draw(gl, program, mode);
-    }
-
-    function yellow() {
-        let yellow = vec3(0.94,0.9,0.55);
-        let yelloww = vec3(0.94,0.95,0.55);
-        let yellowww = vec3(0.90,0.97,0.55);
-        let yellowwww = vec3(0.98,0.92,0.59);
+    function buildingColors() {
+        let yellow1 = vec3(0.4,0.4,0.4);    // cima
+        let yellow2 = vec3(0.5,0.5,0.5);   // esquerda
+        let yellow3 = vec3(0.66,0.66,0.66);      // direita
+        let yellow4 = vec3(0.98,0.92,0.59);
+        let yellow5 = vec3(0.1,0,0.9);
+        let yellow6 = vec3(0.5,0.9,0.9);
         gl.useProgram(program);
         const uColor1 = gl.getUniformLocation(program, "uColor1");
         const uColor2 = gl.getUniformLocation(program, "uColor2");
         const uColor3 = gl.getUniformLocation(program, "uColor3");
         const uColor4 = gl.getUniformLocation(program, "uColor4");
-        gl.uniform3fv(uColor1, yellow);
-        gl.uniform3fv(uColor2, yelloww);
-        gl.uniform3fv(uColor3, yellowww);
-        gl.uniform3fv(uColor4, yellowwww);
+        const uColor5 = gl.getUniformLocation(program, "uColor5");
+        const uColor6 = gl.getUniformLocation(program, "uColor6");
+        gl.uniform3fv(uColor1, yellow1);
+        gl.uniform3fv(uColor2, yellow2);
+        gl.uniform3fv(uColor3, yellow3);
+        gl.uniform3fv(uColor4, yellow4);
+        gl.uniform3fv(uColor5, yellow5);
+        gl.uniform3fv(uColor6, yellow6);
     }
 
-    function red() {
-        let yellow = vec3(0.94,0,0);
-        gl.useProgram(program);
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, yellow);
+    function buildingParts() {
+        buildingColors();
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);
     }
 
-    function greenTroops() {
-        let yellow = vec3(0.34,0.42,0.18);
+    function windowUnit() {
+        let yellow1 = vec3(0.94,0.9,0.55);
         gl.useProgram(program);
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, yellow);
-    }
-
-  /*  function window() {
-        let yellow = vec3(0.94,0.9,0.55);
-        gl.useProgram(program);
-        const uColor = gl.getUniformLocation(program, "uColor");
-        gl.uniform3fv(uColor, yellow);
-       // multScale([0.5,1,0.5]);
+        const uColor2 = gl.getUniformLocation(program, "uColor2");
+        const uColor3 = gl.getUniformLocation(program, "uColor3");
+        gl.uniform3fv(uColor2, yellow1);
+        gl.uniform3fv(uColor3, yellow1);
+        multScale([2,2,1]);
         uploadModelView();
         CUBE.draw(gl, program, mode);
-    }*/
+    }
 
-    function buildings() {
-        //start of central building
+    function windowRowBig() {
         pushMatrix();
-            multScale([10,20,10]);
-            buildingParts();
-          /*  pushMatrix();  //janelas
-                multTranslation([15,0,15]);
-                window();
-            popMatrix();*/
+            multScale([1,1,15.25]);
+            multTranslation([4.5,0,0]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
+            multScale([1,1,15.25]);
+            multTranslation([2,0,0]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
+            multScale([1,1,15.25]);
+            multTranslation([-2,0,0]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
+            multScale([1,1,15.25]);
+            multTranslation([-4.5,0,0]);
+            windowUnit();
+        popMatrix();
+    }
+
+    function windowsBig() {
+        pushMatrix();
+            multTranslation([0,12,0]);
+            windowRowBig();
+        popMatrix();        
+        pushMatrix();
+            multTranslation([0,9,0]);
+            windowRowBig();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,6,0]);
+            windowRowBig();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,3,0]);
+            windowRowBig();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,0,0]);
+            windowRowBig();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,-3,0]);
+            windowRowBig();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,-6,0]);
+            windowRowBig();
+        popMatrix();
+    }
+
+    function windowRowMedium() {
+        pushMatrix();
+            multScale([1,1,10.10]);
+            multTranslation([3,17,0]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
+            multScale([1,1,10.10]);
+            multTranslation([-0.05,17,0]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
+            multScale([1,1,10.10]); 
+            multTranslation([-3,17,0]);
+            windowUnit();
+        popMatrix();
+    }
+
+    function windowsMedium() {
+        pushMatrix();
+            windowRowMedium();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,3,0]);
+            windowRowMedium();
+        popMatrix();
+    }
+
+    function windowsRowSmall() {
+        pushMatrix();
+            multScale([1,1,7.25]);
+            multTranslation([1.4,0,0]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
+            multScale([1,1,7.25]);
+            multTranslation([-1.4,0,0]);
+            windowUnit();
+        popMatrix();        
+    }
+
+    function windowsSmall() {
+        pushMatrix();
+            multTranslation([0,7.5,0]);
+            windowsRowSmall();
+        popMatrix();
+        pushMatrix();
+            multTranslation([0,4.7,0]);
+            windowsRowSmall();
+        popMatrix();   
+    }
+
+    function centralBuilding() {
+        pushMatrix();
+            pushMatrix();
+                multTranslation([0,2.25,0]);
+                multScale([15,25,15]);
+                buildingParts();
+            popMatrix();
+            pushMatrix();
+                pushMatrix();
+                    windowsBig();
+                popMatrix();
+                pushMatrix();
+                    multRotationY(90);
+                    windowsBig();
+                popMatrix();
+            popMatrix();
         popMatrix();    
         pushMatrix();
-            multTranslation([0,14,0]);
-            multScale([7,8,7]);
-            buildingParts();
+            pushMatrix();
+                multTranslation([0,18,0]);
+                multScale([10,10,10]);
+                buildingParts();
+            popMatrix();
+            pushMatrix();
+                pushMatrix();
+                    windowsMedium();   
+                popMatrix();
+                pushMatrix();
+                    multRotationY(90);
+                    windowsMedium();    
+                popMatrix();     
+            popMatrix();
         popMatrix();
         pushMatrix();
-            multTranslation([0,20,0]);
-            multScale([4,6,4]);
-            buildingParts();
+            pushMatrix();
+                multTranslation([0,26,0]);
+                multScale([7,9,7]);
+                buildingParts();
+            popMatrix();
+            pushMatrix(); 
+                multTranslation([0,20.25,0]);
+                windowsSmall();
+            popMatrix();
+            pushMatrix();
+                multTranslation([0,20.25,0]);
+                multRotationY(90);
+                windowsSmall();
+            popMatrix();
         popMatrix();
         pushMatrix();
-            multTranslation([0,20,0]);
-            multScale([4,6,4]);
-            buildingParts();
-        popMatrix();
-        pushMatrix();
-            multTranslation([0,25,0]);
-            multScale([1.5,10,1.5]);
-            buildingParts();
-        popMatrix();
-        //end of central building
-        pushMatrix();
-            multTranslation([50,-3,0]);
-            multScale([5,14,5]);
-            buildingParts();
-        popMatrix();
-        pushMatrix();
-            multTranslation([-75,40,0]);
-            multScale([12,20,8]);
-            buildingParts();
-        popMatrix();
-        /*pushMatrix();
-            multTranslation([-65,45,5]);
-            multScale([8,20,8]);
-            buildingParts();
-        popMatrix();*/
-        pushMatrix();
-            multTranslation([-65,45,-8]);
-            multScale([16,20,8]);
+            multTranslation([0,33,0]);
+            multScale([2,10,2]);
             buildingParts();
         popMatrix();
     }
 
-    function floor() {
-        yellow();
+    function buildings() {
+        pushMatrix();
+            multTranslation([0,10,0]);
+            pushMatrix();
+                centralBuilding();
+                popMatrix();
+                pushMatrix();
+                    multTranslation([50,-3,0]);
+                    multScale([5,14,5]);
+                    buildingParts();
+                popMatrix();
+                pushMatrix();
+                    multTranslation([-50,0,-32]);
+                    multScale([12,20,8]);
+                    buildingParts();
+                popMatrix();
+                pushMatrix();
+                    multTranslation([-35,0,-32]);
+                    multScale([8,20,8]);
+                    buildingParts();
+                popMatrix();
+                pushMatrix();
+                    multTranslation([-35,0,-48]);
+                    multScale([16,20,8]);
+                    buildingParts();
+                popMatrix();
+        popMatrix();
+    }
+
+    function floorRoadDash(i) {
+        multTranslation([i,0.025,0]);
+        if (i == -59 || i == 59)
+            multScale([0.5,1,1]);
+
+        let white = vec3(1,1,1);
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor2 = gl.getUniformLocation(program, "uColor2");
+        const uColor3 = gl.getUniformLocation(program, "uColor3");
+        gl.uniform3fv(uColor1, white);
+        gl.uniform3fv(uColor2, white);
+        gl.uniform3fv(uColor3, white);
+
+        multScale([4,0.25,0.5]);
+
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function floorRoadUnit() {
+        pushMatrix();
+            road();
+        popMatrix();
+        let i = -59;
+        while (i < 60) {
+            pushMatrix();
+                floorRoadDash(i);   
+            popMatrix();
+            i += 6;
+        } 
+        // VER PQQ NAO APARECE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        pushMatrix();
+            multTranslation([-59,0.025,0]);
+            multScale([0.5,1,1]);
+            floorRoadDash();
+        popMatrix();                      
+    }
+
+    function road() {
+        let grey = vec3(0.2,0.2,0.2);
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor2 = gl.getUniformLocation(program, "uColor2");
+        const uColor3 = gl.getUniformLocation(program, "uColor3");
+        gl.uniform3fv(uColor1, grey);
+        gl.uniform3fv(uColor2, grey);
+        gl.uniform3fv(uColor3, grey);
+
+        multScale([120,0.25,8]);
+
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);
+    }
+
+    function floorRoads() {
+        pushMatrix();
+            multTranslation([0,0.25,-40]);
+            floorRoadUnit();
+        popMatrix();
+        pushMatrix();
+            multRotationY(90);
+            multTranslation([0,0.25,30]);
+            floorRoadUnit();            
+        popMatrix();
+    }
+
+    function floorBase() {
+        let grey = vec3(0.25,0.25,0.25);
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor2 = gl.getUniformLocation(program, "uColor2");
+        const uColor3 = gl.getUniformLocation(program, "uColor3");
+        gl.uniform3fv(uColor1, grey);
+        gl.uniform3fv(uColor2, grey);
+        gl.uniform3fv(uColor3, grey);
+
         multScale([120,0.25,120]);
 
         uploadModelView();
@@ -288,13 +502,165 @@ function setup(shaders) {
         CUBE.draw(gl, program, mode);
     }
 
+    function floor() {
+        pushMatrix();
+            floorBase();
+        popMatrix();
+        pushMatrix();
+            floorRoads();
+        popMatrix();
+    }
+
+    function pyramidForTree() {
+        let green = vec3(0.14,0.55,0.13);
+        gl.useProgram(program);
+        const uColor6 = gl.getUniformLocation(program, "uColor6");
+        gl.uniform3fv(uColor6, green);
+
+        multScale([2,2,2]);
+        multTranslation([0,1,0]);
+
+        uploadModelView();
+
+        PYRAMID.draw(gl, program, mode);        
+    }
+
+    function partOfTree(){
+        pushMatrix();
+            multTranslation([0,1.8,0]);
+            pyramidForTree();
+        popMatrix();
+        pushMatrix();
+            pyramidForTree();
+        popMatrix();        
+    }
+
+    function tree() {              
+        pushMatrix();
+            partOfTree();
+        popMatrix();
+        pushMatrix();
+            multRotationY(30);
+            partOfTree();
+        popMatrix();
+        pushMatrix();
+            multRotationY(120);
+            partOfTree();
+        popMatrix();        
+    }
+
+    function treesPos() {
+        for (let i = 0; i < 60; i++) {
+            let rand = Math.floor(Math.random() * (-20 + 58)) - 58;
+            let rand2 = Math.floor(Math.random() * (59 - 15 + 1)) + 15; 
+            if (((-45 > rand) || (rand > -25)) && ((26 > rand2) || (rand2 > 42)))
+                trees.push([rand, rand2]);
+        }
+    }
+
+    treesPos();
+
+    function onde() {               // ONDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        multTranslation([-25,1,42]);
+        multScale([0.5,20,0.5]);
+
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode);  
+    }
+
+    function setOfTrees() {
+        for (let i = 0; i < trees.length; i++) {
+            pushMatrix();
+                multTranslation([trees[i][0],0,trees[i][1]]);
+                tree();
+            popMatrix(); 
+        }
+  
+  /*      for (let i = -35; i > -55; i-=5) {
+            for (let j = 15; j < 40; j+=2) {
+                pushMatrix();
+                    multTranslation([i,0,j]);
+                    tree();
+                popMatrix();  
+            } 
+        }        */
+      /*  pushMatrix();
+            multTranslation([-50,0,30]);
+            tree();
+        popMatrix();    
+        pushMatrix();
+            multTranslation([-40,0,20]);
+            tree();
+        popMatrix();  
+        pushMatrix();
+            multTranslation([-45,0,20]);
+            tree();
+        popMatrix(); 
+        pushMatrix();
+            multTranslation([-55,0,20]);
+            tree();
+        popMatrix();   
+        pushMatrix();
+            multTranslation([-45,0,30]);
+            tree();
+        popMatrix();  
+        */ 
+    }
+
+    function partOfLake() {
+        let blue = vec3(0.13,0.7,0.67);
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor6 = gl.getUniformLocation(program, "uColor6");
+        gl.uniform3fv(uColor1, blue);
+        gl.uniform3fv(uColor6, blue);
+
+        multTranslation([0,0.05,0]);
+        multScale([8,0.25,8]);
+
+        uploadModelView();
+
+        CYLINDER.draw(gl, program, mode);  
+    }
+
+    function lake() {
+        pushMatrix();
+            multTranslation([15,0,4]);
+            partOfLake();     
+        popMatrix(); 
+        pushMatrix();
+            multTranslation([17,0,0]);
+            partOfLake();    
+        popMatrix();
+        pushMatrix();
+            multTranslation([20,0,6]);
+            partOfLake();            
+        popMatrix();
+    }
+
+    function garden() {
+        pushMatrix();
+           /* let i = 0;
+            while() {
+
+            }*/
+            setOfTrees();
+        popMatrix();  
+        pushMatrix();
+            multTranslation([-50,0,30]);
+            lake();
+        popMatrix();
+    }
+
     function cenary() {
         buildings();
-        floor()
+        floor();
+        garden();
     }
 
     function tailBody() {
-        greenTroops();
+        //greenTroops();
         multTranslation([4, 0.65, 0]);
         multScale([5.20, 0.75, 0.75]);
 
@@ -304,7 +670,7 @@ function setup(shaders) {
     }
 
     function cockpit() {
-        greenTroops();
+        //greenTroops();
         multScale([5.56, 2.6, 2.6]);
 
         uploadModelView();
@@ -313,7 +679,7 @@ function setup(shaders) {
     }
 
     function tailSkid() {
-        greenTroops();
+        //greenTroops();
         multRotationZ(-20);
         multScale([0.75, 1.5, 0.75]);
 
@@ -323,7 +689,7 @@ function setup(shaders) {
     }
 
     function tailRotor() {
-        greenTroops();
+       // greenTroops();
         multScale([.25, 1, .25]);
 
         uploadModelView();
@@ -332,7 +698,7 @@ function setup(shaders) {
     }
 
     function tailBlades(xTrans) {
-        greenTroops();
+       // greenTroops();
         multTranslation([xTrans * 0.6, 0.8, 0]);
         multScale([1, 0.2, 0.2]);
 
@@ -368,7 +734,7 @@ function setup(shaders) {
     }
 
     function topRotor() {
-        greenTroops();
+       // greenTroops();
         multScale([0.2, 1.3, 0.2]);
 
         uploadModelView();
@@ -377,7 +743,7 @@ function setup(shaders) {
     }
 
     function blade() {
-        greenTroops();
+        //greenTroops();
         multTranslation([2.5, 0.35, 0]);
         multScale([5, 0.2, 0.5]);
 
@@ -409,7 +775,7 @@ function setup(shaders) {
     }
 
     function connector(i) {
-        greenTroops();
+        //greenTroops();
         multTranslation([0, -0.2, 0]);
         multRotationX(-30);
         multRotationZ(i*30);
@@ -422,7 +788,7 @@ function setup(shaders) {
     }
 
     function skid() {
-        greenTroops();
+        //greenTroops();
         multScale([5, 0.2, 0.2]);
         multRotationZ(90);
 
@@ -464,15 +830,14 @@ function setup(shaders) {
         CUBE.draw(gl, program, mode);
     }
 
-
-    function printInfo(){
+    /*function printInfo(){
         console.log("Velocity: " + velocity);
         console.log("Is it Breaking: " + breaking);
         console.log("Angle: " + (angle%360) );
         console.log("Tilt: " + (heli_tilt) );
         console.log("Height: " + distancey);
         console.log("Blades Speed: " + bladesSpeed );
-    }
+    }*/
 
     //in every call in render(), updates the blade's speed and angle
     function setBladesSpeed(){
@@ -518,6 +883,10 @@ function setup(shaders) {
 
     function renderInstances(){
         pushMatrix();
+            onde();
+        popMatrix();
+
+        pushMatrix();
             cenary();
         popMatrix();
         pushMatrix();
@@ -525,7 +894,7 @@ function setup(shaders) {
             multTranslation([distancex, 0, 0]);
             multRotationY(90);
                 pushMatrix();
-                    //rotation done on the down front Zaxis of the helicopter to garantee that it dont rotate into the ground
+                    //rotation done on the down front Z axis of the helicopter to garantee that it dont rotate into the ground
                     multTranslation([-5.56/2,-1.5 + distancey,0]);
                     multRotationZ(heli_tilt);
                     multTranslation([5.56/2,1.5,0]);
@@ -546,7 +915,7 @@ function setup(shaders) {
 
         loadMatrix(lookAt(view, at, up));
 
-        printInfo();
+       // printInfo();
 
         updateParameters();
 
