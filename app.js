@@ -413,6 +413,11 @@ function setup(shaders) {
                     multScale([16,20,8]);
                     buildingParts();
                 popMatrix();
+                pushMatrix();
+                    multTranslation([42,0,-48]);
+                    multScale([16,30,8]);
+                    buildingParts();
+                popMatrix();                
         popMatrix();
     }
 
@@ -450,7 +455,7 @@ function setup(shaders) {
         } 
         // VER PQQ NAO APARECE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         pushMatrix();
-            multTranslation([-59,0.025,0]);
+            multTranslation([-40,0.025,0]);
             multScale([0.5,1,1]);
             floorRoadDash();
         popMatrix();                      
