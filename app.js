@@ -10,7 +10,6 @@ import * as SPHERE from '../../libs/objects/sphere.js';
 import * as CYLINDER from '../../libs/objects/cylinder.js';
 
 import * as CUBE from '../../libs/objects/cube.js';
-import { mult } from "./libs/MV.js";
 
 import * as PYRAMID from '../../libs/objects/pyramid.js';
 
@@ -44,7 +43,7 @@ const BOX_LIFETIME = 15;
 const v = mat4(
     vec4(1,0,0,0),
     vec4(0,1,0,0), 
-    vec4(0,0,0,0), 
+    vec4(0,0,1,0), 
     vec4(0,0,0,1)
     );
 
@@ -69,14 +68,12 @@ let fallSpeed = 10/VP_DISTANCE;
 
 let boxes = [];
 
-
 function setup(shaders) {
     let canvas = document.getElementById("gl-canvas");
     let aspect = canvas.width / canvas.height;
 
     gl = setupWebGL(canvas);
     
-
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
     let mProjection = ortho(-VP_DISTANCE * aspect, VP_DISTANCE * aspect, -VP_DISTANCE, VP_DISTANCE, -3 * VP_DISTANCE, 3 * VP_DISTANCE);
@@ -105,8 +102,6 @@ function setup(shaders) {
         xAngle = (document.getElementById("rotCamX").value)*Math.PI*2/(360);
     });
 
-
-
     function setAxonometricView(){
         xAngle = 45 * Math.PI*2 /360;
         yAngle = 45 * Math.PI*2 /360;
@@ -126,7 +121,6 @@ function setup(shaders) {
         xAngle = 90 *Math.PI*2 /360;
         yAngle = 90 *Math.PI*2 /360;
     }
-
 
     document.onkeydown = function (event) {
         switch (event.key) {
@@ -207,7 +201,7 @@ function setup(shaders) {
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
-    function buildingColors() {
+    function buildingsColors() {
         let yellow1 = vec3(0.4,0.4,0.4);    // cima
         let yellow2 = vec3(0.5,0.5,0.5);   // esquerda
         let yellow3 = vec3(0.66,0.66,0.66);      // direita
@@ -230,7 +224,7 @@ function setup(shaders) {
     }
 
     function buildingParts() {
-        buildingColors();
+        buildingsColors();
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
@@ -895,7 +889,7 @@ function setup(shaders) {
         console.log("Tilt: " + (heli_tilt) );
         console.log("Height: " + distancey);
         console.log("Blades Speed: " + bladesSpeed );
-    }*/
+    }
 
     //in every call in render(), updates the blade's speed and angle
     function setBladesSpeed(){
