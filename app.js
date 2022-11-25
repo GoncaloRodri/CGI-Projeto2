@@ -512,7 +512,7 @@ function setup(shaders) {
     }
 
     function pyramidForTree() {
-        let green = vec3(0.14,0.55,0.13);
+        let green = vec3(0.075,0.31,0.075);
         gl.useProgram(program);
         const uColor6 = gl.getUniformLocation(program, "uColor6");
         gl.uniform3fv(uColor6, green);
@@ -550,18 +550,26 @@ function setup(shaders) {
     }
 
     function treesPos() {
-        for (let i = 0; i < 60; i++) {
-            let rand = Math.floor(Math.random() * (-20 + 58)) - 58;
-            let rand2 = Math.floor(Math.random() * (59 - 15 + 1)) + 15; 
-            if (((-45 > rand) || (rand > -25)) && ((26 > rand2) || (rand2 > 42)))
-                trees.push([rand, rand2]);
-        }
+        trees.push([-50,30]);
+        trees.push([-40,20]);
+        trees.push([-45,20]);
+        trees.push([-55,20]);
+        trees.push([-45,30]);
+        trees.push([-47,33]);
+        trees.push([-47.5,30.8]);
+        trees.push([-45.5,26]);
+        trees.push([-50,26]);
+        trees.push([-50,22]);
+        trees.push([-54,24]);
+
+        trees.push([-54,40]);
+        trees.push([-50,43]);
     }
 
     treesPos();
 
     function onde() {               // ONDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-        multTranslation([-25,1,42]);
+        multTranslation([-25,1,5]);
         multScale([0.5,20,0.5]);
 
         uploadModelView();
@@ -572,40 +580,10 @@ function setup(shaders) {
     function setOfTrees() {
         for (let i = 0; i < trees.length; i++) {
             pushMatrix();
-                multTranslation([trees[i][0],0,trees[i][1]]);
+                multTranslation([trees[i][0],-0.7,trees[i][1]]);
                 tree();
             popMatrix(); 
-        }
-  
-  /*      for (let i = -35; i > -55; i-=5) {
-            for (let j = 15; j < 40; j+=2) {
-                pushMatrix();
-                    multTranslation([i,0,j]);
-                    tree();
-                popMatrix();  
-            } 
-        }        */
-      /*  pushMatrix();
-            multTranslation([-50,0,30]);
-            tree();
-        popMatrix();    
-        pushMatrix();
-            multTranslation([-40,0,20]);
-            tree();
-        popMatrix();  
-        pushMatrix();
-            multTranslation([-45,0,20]);
-            tree();
-        popMatrix(); 
-        pushMatrix();
-            multTranslation([-55,0,20]);
-            tree();
-        popMatrix();   
-        pushMatrix();
-            multTranslation([-45,0,30]);
-            tree();
-        popMatrix();  
-        */ 
+        }        
     }
 
     function partOfLake() {
@@ -616,7 +594,7 @@ function setup(shaders) {
         gl.uniform3fv(uColor1, blue);
         gl.uniform3fv(uColor6, blue);
 
-        multTranslation([0,0.05,0]);
+        multTranslation([0,0.15,0]);
         multScale([8,0.25,8]);
 
         uploadModelView();
@@ -624,7 +602,7 @@ function setup(shaders) {
         CYLINDER.draw(gl, program, mode);  
     }
 
-    function lake() {
+    function lakes() {
         pushMatrix();
             multTranslation([15,0,4]);
             partOfLake();     
@@ -637,19 +615,46 @@ function setup(shaders) {
             multTranslation([20,0,6]);
             partOfLake();            
         popMatrix();
+        pushMatrix();
+            multTranslation([20,0,12]);
+            partOfLake();            
+        popMatrix();
+        pushMatrix();
+            multTranslation([10,0,22]);
+            partOfLake();            
+        popMatrix();     
+        pushMatrix();
+            multTranslation([14,0,23]);
+            partOfLake();            
+        popMatrix();            
+    }
+
+    function grass() {
+        let green = vec3(0,0.6,0.09);
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor6 = gl.getUniformLocation(program, "uColor6");
+        gl.uniform3fv(uColor1, green);
+        gl.uniform3fv(uColor6, green);
+
+        multTranslation([-41,0.05,36]);
+        multScale([38,0.25,48]);
+
+        uploadModelView();
+
+        CUBE.draw(gl, program, mode); 
     }
 
     function garden() {
         pushMatrix();
-           /* let i = 0;
-            while() {
-
-            }*/
             setOfTrees();
         popMatrix();  
         pushMatrix();
             multTranslation([-50,0,30]);
-            lake();
+            lakes();
+        popMatrix();
+        pushMatrix();
+            grass();
         popMatrix();
     }
 
