@@ -1,7 +1,9 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten } from "../../libs/MV.js";
+
+import { ortho, lookAt, flatten, mult, normalize, length, vec3, mat4, vec4, inverse, printm} from "../../libs/MV.js";
+
 import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
-import {vec3} from "../../libs/MV.js";
+
 
 import * as SPHERE from '../../libs/objects/sphere.js';
 
@@ -22,7 +24,6 @@ let animation = true;   // Animation is running
 
 let trees = []; 
 
-
 const VP_DISTANCE = 60;
 
 const ACELARATION = 1.2;
@@ -31,24 +32,30 @@ const MAX_VELOCITY = 1;
 const BLADE_SPEED = 10;
 const MAX_HEIGHT = 20;
 const HEIGHT_RATIO = 0.5;
-const AXONOMETRIC_VIEW = [-VP_DISTANCE, VP_DISTANCE, VP_DISTANCE];
-const FRONT_VIEW = [-VP_DISTANCE, 0, 0];
-const SIDE_VIEW = [0, 0, VP_DISTANCE];
-const TOP_VIEW = [0, 0, 0];
-const DEFAULT_UP = [0, 1, 0];
-const TOP_UP = [1, 0, 0];
-const DEFAULT_AT = [0, 0, 0];
-const TOP_AT = [0, -1, 0];
 const MAX_BLADE_SPEED = 300;
 const MAX_TILT = 30;
 const STARTING_HEIGHT = 10;
 const MOVEMENT_RADIUS = 30;
 const STARTING_POSITION = 90;
+const BOX_LIFETIME = 15;
 
-let view = AXONOMETRIC_VIEW;
-let at = DEFAULT_AT;
-let up = DEFAULT_UP;
+
+
+const v = mat4(
+    vec4(1,0,0,0),
+    vec4(0,1,0,0), 
+    vec4(0,0,0,0), 
+    vec4(0,0,0,1)
+    );
+
+let xAngle = 45* 2*Math.PI/360;
+let yAngle = 45* 2*Math.PI/360;
+
+let mView = v;
+
+
 let bladesSpeed = BLADE_SPEED;
+
 
 let angle = STARTING_POSITION;
 let distancey = STARTING_HEIGHT;
@@ -58,6 +65,9 @@ let breaking = false;
 let heli_tilt = 0;
 let blade_angle = 0;
 let lastVelocity = velocity;
+let fallSpeed = 10/VP_DISTANCE;
+
+let boxes = [];
 
 
 function setup(shaders) {
@@ -65,6 +75,7 @@ function setup(shaders) {
     let aspect = canvas.width / canvas.height;
 
     gl = setupWebGL(canvas);
+    
 
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
@@ -84,32 +95,42 @@ function setup(shaders) {
 
     document.getElementById("top").addEventListener("change", setTopView);
 
-    function setAxonometricView() {
-        view = AXONOMETRIC_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+
+    document.getElementById("rotCamY").addEventListener("input", function(event){
+        yAngle = (document.getElementById("rotCamY").value)*Math.PI*2/(360);
+
+    });
+
+    document.getElementById("rotCamX").addEventListener("input", function(event){
+        xAngle = (document.getElementById("rotCamX").value)*Math.PI*2/(360);
+    });
+
+
+
+    function setAxonometricView(){
+        xAngle = 45 * Math.PI*2 /360;
+        yAngle = 45 * Math.PI*2 /360;
     }
 
-    function setSideView() {
-        view = SIDE_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+    function setSideView(){
+        xAngle = 0;
+        yAngle = 0;
     }
 
-    function setFrontView() {
-        view = FRONT_VIEW;
-        up = DEFAULT_UP;
-        at = DEFAULT_AT;
+    function setFrontView(){
+        xAngle = 0;
+        yAngle = 90 *Math.PI*2 /360;        
     }
 
-    function setTopView() {
-        view = TOP_VIEW;
-        up = TOP_UP;
-        at = TOP_AT;
+    function setTopView(){
+        xAngle = 90 *Math.PI*2 /360;
+        yAngle = 90 *Math.PI*2 /360;
     }
+
 
     document.onkeydown = function (event) {
         switch (event.key) {
+
             case 'w':
                 mode = gl.LINES;
                 break;
@@ -131,8 +152,9 @@ function setup(shaders) {
             case '4':
                 setTopView();
                 break;
-            case 'Space':
-                //dropBox();
+            case ' ':
+                console.log("boxe draw!")
+                boxes.push([distancey-2, time+5, angle, velocity]);
                 break;
             case 'ArrowUp':
                 if(distancey < MAX_HEIGHT)
@@ -144,7 +166,8 @@ function setup(shaders) {
                 break;
             case 'ArrowLeft':
                 if(velocity <= MAX_VELOCITY && distancey > 0){
-                    if(velocity == 0) velocity = 0.10;
+                    breaking = false;
+                    if(velocity <= 0) velocity = 0.10;
                     if(velocity*ACELARATION > MAX_VELOCITY) 
                         velocity = MAX_VELOCITY;
                     else
@@ -831,16 +854,41 @@ function setup(shaders) {
         popMatrix();
     }
 
-    function dropBox() {
-        //multScale([5, 0.2, 0.2]);
-        multTranslation([0,0,-bladesSpeed]);
-
+    function dropBox(box) {
+        multScale([1.5,1.5,1.5])
+        if(box[0] > 0) {
+            if(box[0] - 1 < 0) box[0] = 0;
+            else box[0] -=  0.5;
+            multTranslation([0,box[0]+ 1.5/2 + 0.25,0]);
+        } else {
+            if(box[1] <= time)
+                boxes.splice(boxes.indexOf(box),1);
+        }
+        
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
     }
 
-    /*function printInfo(){
+    function loadRotationX(){
+        return mat4(
+            vec4(1,0,0,0), 
+            vec4(0, Math.cos(xAngle), -Math.sin(xAngle),0),
+            vec4(Math.sin(xAngle),0,Math.cos(xAngle),0), 
+            vec4(0,0,0,1)
+            );
+    }
+
+    function loadRotationY(){
+        return mat4(
+            vec4(Math.cos(yAngle),0,Math.sin(yAngle),0),
+            vec4(0,1,0,0), 
+            vec4(-Math.sin(yAngle),0,Math.cos(yAngle),0), 
+            vec4(0,0,0,1)
+            );
+    }
+
+    function printInfo(){
         console.log("Velocity: " + velocity);
         console.log("Is it Breaking: " + breaking);
         console.log("Angle: " + (angle%360) );
@@ -899,22 +947,47 @@ function setup(shaders) {
         pushMatrix();
             cenary();
         popMatrix();
+
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, 0, 0]);
+           
             multRotationY(90);
                 pushMatrix();
-                    //rotation done on the down front Z axis of the helicopter to garantee that it dont rotate into the ground
-                    multTranslation([-5.56/2,-1.5 + distancey,0]);
+                    //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
+                    multTranslation([-5.56/2,distancey+0.25,0]);
+
                     multRotationZ(heli_tilt);
                     multTranslation([5.56/2,1.5,0]);
                     body((blade_angle));
                     skidPlusConnectors();
                     topBlades((blade_angle));
+            popMatrix();
+        popMatrix();
+        pushMatrix();
+        boxes.forEach(box => {
+            pushMatrix();
+            console.log("box " + box);
+            
+            if(box[0] > 0 ) box[2] += velocity; 
+            multRotationY(-box[2]);
+            pushMatrix();     
+            multTranslation([distancex, 0, 0]);
+                dropBox(box);
+            popMatrix();
+            popMatrix();
+        });
+        pushMatrix();
+            cenary();
+        popMatrix();
+        popMatrix();
+       
     }
 
     function render() {
         if (animation) time += speed;
+
+        console.log(time);
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -922,15 +995,18 @@ function setup(shaders) {
         gl.useProgram(program);
 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
-
-        loadMatrix(lookAt(view, at, up));
-
-       // printInfo();
+    
+        mView = mult(mult(v, loadRotationX()), loadRotationY());
+        
+        loadMatrix(mView);
+        
+        //printInfo();
 
         updateParameters();
 
         renderInstances();
     }
+
 }
 
 const urls = ["shader.vert", "shader.frag"];
