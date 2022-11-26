@@ -27,14 +27,14 @@ const ACELARATION = 1.2;
 const DECELARATION = 1.1;
 const MAX_VELOCITY = 1;
 const BLADE_SPEED = 10;
-const MAX_HEIGHT = 20;
+const MAX_HEIGHT = 40;
 const HEIGHT_RATIO = 0.5;
 const MAX_BLADE_SPEED = 300;
 const MAX_TILT = 30;
 const STARTING_HEIGHT = 10;
 const MOVEMENT_RADIUS = 30;
 const STARTING_POSITION = 90;
-const BOX_LIFETIME = 15;
+const BOX_LIFETIME = 5;
 const DEGRE2RAD = Math.PI * 2 / 360;
 const X_AXONOMETRIC = 40.0;
 const Y_AXONOMETRIC = 45.0;
@@ -45,7 +45,13 @@ const Y_SIDE_VIEW = 90.0;
 const X_TOP_VIEW = 90.0;
 const Y_TOP_VIEW = 90.0;
 
-
+const view_options = {
+        Axonometric_View: "axo",
+        Front_View: "front",
+        Side_View: "side",
+        Top_View: "top"
+    
+};
 
 const v = mat4(
     vec4(1,0,0,0),
@@ -57,19 +63,11 @@ const v = mat4(
 let camController=  {
     xAxis: X_AXONOMETRIC,
     yAxis: Y_AXONOMETRIC,
-    Axonometric_View: true,
-    Front_View: false,
-    Side_View: false,
-    Top_View: false,
-    dummy: function() {}
+    view: view_options.Axonometric_View,
 };
 
 let mView = v;
-
-
 let bladesSpeed = BLADE_SPEED;
-
-
 let angle = STARTING_POSITION;
 let distancey = STARTING_HEIGHT;
 let distancex = MOVEMENT_RADIUS;
@@ -78,20 +76,8 @@ let breaking = false;
 let heli_tilt = 0;
 let blade_angle = 0;
 let lastVelocity = velocity;
-let fallSpeed = 10/VP_DISTANCE;
-
 let boxes = [];
 
-function init_cam_control() {
-
-    const gui = new dat.GUI();
-
-    let folder;
-    folder = gui.addFolder('Controls');
-    folder.add(camController, 'xAxis', 0, 90, 1);
-    folder.add(camController, 'yAxis', 0, 180, 1);
-
-    }
 
 function setup(shaders) {
     let canvas = document.getElementById("gl-canvas");
@@ -108,9 +94,36 @@ function setup(shaders) {
 
     resize_canvas();
 
+    function init_cam_control() {
+
+        const gui = new dat.GUI();
+    
+        let folder;
+        folder = gui.addFolder('Controls');
+        folder.add(camController, 'xAxis', 0, 90, 1);
+        folder.add(camController, 'yAxis', 0, 180, 1);
+        folder.add(camController, 'view', view_options).onChange(() => updateView());
+        }
     
     init_cam_control();
 
+
+    function updateView(){
+        switch(camController.view){
+            case "axo":
+                setAxonometricView();
+                break;
+            case "front":
+                setFrontView();
+                break;
+            case "side":
+                setSideView();
+                break;
+            case "top":
+                setTopView();
+                break;
+        }
+    }
 
     window.addEventListener("resize", resize_canvas);
 
@@ -118,24 +131,16 @@ function setup(shaders) {
     function setAxonometricView(){
         camController.xAxis = X_AXONOMETRIC;
         camController.yAxis = Y_AXONOMETRIC;
-        camController.Axonometric_View = true;
-        camController.Front_View = false;
-        camController.Side_View = false;
-        camController.Top_View = false;
     }
 
     function setSideView(){
         camController.xAxis = X_SIDE_VIEW;
         camController.yAxis = Y_SIDE_VIEW;
-        camController.Axonometric_View = false;
-        camController.Front_View = true;
-        camController.Side_View = false;
-        camController.Top_View = false;
     }
 
     function setFrontView(){
         camController.xAxis = X_FRONT_VIEW;
-        camController.yAxis = Y_FRONT_VIEW;       
+        camController.yAxis = Y_FRONT_VIEW;      
     }
 
     function setTopView(){
@@ -170,7 +175,7 @@ function setup(shaders) {
                 break;
             case ' ':
                 //console.log("time is:" + time)
-                boxes.push([distancey-2, time+5, angle, velocity]);
+                boxes.push([distancey , time + BOX_LIFETIME, angle, velocity]);
                 break;
             case 'ArrowUp':
                 if(distancey < MAX_HEIGHT)
@@ -480,17 +485,17 @@ function setup(shaders) {
     }
 
     function dropBox(box) {
-        multScale([1.5,1.5,1.5])
         if(box[0] > 0) {
             if(box[0] - 1 < 0) box[0] = 0;
             else box[0] -= 0.11;
             multTranslation([0,box[0] + 0.25,0]);
-        } else {
-            //console.log("hit the floor at: " + time);
-            if(box[1] <= time)
-                boxes.splice(boxes.indexOf(box),1);
         }
+            //console.log("hit the floor at: " + time);
+        if(box[1] <= time)
+            boxes.splice(boxes.indexOf(box),1);
         
+        
+        multScale([1.5,1.5,1.5])
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
@@ -508,7 +513,7 @@ function setup(shaders) {
     }
 
     function loadRotationY(){
-
+        
         let y = camController.yAxis * DEGRE2RAD;
         return mat4(
             vec4(Math.cos(y), 0, Math.sin(y), 0),
@@ -595,7 +600,7 @@ function setup(shaders) {
             pushMatrix();
             console.log("box " + box);
             
-            if(box[0] > 0 ) box[2] += velocity; 
+            if(box[0] > 0 ) box[2] += box[3]; 
             multRotationY(-box[2]);
             pushMatrix();     
             multTranslation([distancex, 0, 0]);
@@ -605,16 +610,11 @@ function setup(shaders) {
         });
         
         popMatrix();
-        
-            
-              
-
     }
 
     function render() {
         if (animation) time += speed;
 
-        console.log(time);
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -627,7 +627,7 @@ function setup(shaders) {
         
         loadMatrix(mView);
         
-        printInfo();
+        //printInfo();
 
         updateParameters();
 
