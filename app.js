@@ -1,6 +1,6 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
 
-import { ortho, flatten, mult, vec3, mat4, vec4} from "../../libs/MV.js";
+import { ortho, flatten, vec3,lookAt} from "../../libs/MV.js";
 
 import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
 
@@ -13,7 +13,6 @@ import * as CYLINDER from '../../libs/objects/cylinder.js';
 import * as CUBE from '../../libs/objects/cube.js';
 
 import * as PYRAMID from '../../libs/objects/pyramid.js';
-import { lookAt } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
 let gl;
