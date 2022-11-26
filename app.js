@@ -876,7 +876,7 @@ function setup(shaders) {
 
     function dropBox(box) {
         if(box[0] >= 0.75) {
-            if(box[0] - 0.20 <= 0.75){ 
+            if(box[0] - box[4] <= 0.75){ 
                 box[0] = 0.75;
             }else{ 
                 box[0] -=  box[4];
