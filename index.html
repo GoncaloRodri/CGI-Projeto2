@@ -2,42 +2,13 @@
 <html>
     <head>
         <link rel="stylesheet" href="styles.css">
-        <title>Exercício 20</title>
+        <title>Projeto CGI 2</title>
         <script type="module" src="./app.js"></script>
     </head>
     <body>
         <canvas id="gl-canvas" width="128" height="128">
             Oops! Something went wrong!
         </canvas>
-        <div class="footer" >
-
-            <section class="inputSection">
-                <form oninput="out.value = rotCamX.value">
-                    <label for="rotCamX"> Rotate Camera: X </label> 
-                    <input type="range" value="135" min="0" max="90" class="slider" id="rotCamX">
-                    <br> 
-                    <p id="out">123</p>
-                </form>
-            </section> 
-            <section class="inputSection">
-                <form oninput="out2.value = rotCamY.value">
-                    <label for="rotCamY"> Rotate Camera: Y </label> 
-                    <input type="range" value="45" min="0" max="360" class="slider" id="rotCamY">
-                    <br> 
-                    <output value ="45" id="out2"></output>
-                </form>
-            </section>
-            <section class="selectSection">
-                <form id="viewForm" >
-                    <input type="radio" name="view" id="axonometric" >
-                    <label for="axonometric">Axonometric View</label>
-                    <input type="radio" name="view" id="front">
-                    <label for="front">Front View</label>
-                    <input type="radio" name="view" id="side">
-                    <label for="side">Side View</label>
-                    <input type="radio" name="view" id="top">
-                    <label for="top">Top View</label>
-                    <output id="out"></output>
                 </form>
             </section>
         </div>
