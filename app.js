@@ -35,6 +35,15 @@ const STARTING_HEIGHT = 10;
 const MOVEMENT_RADIUS = 30;
 const STARTING_POSITION = 90;
 const BOX_LIFETIME = 15;
+const DEGRE2RAD = Math.PI * 2 / 360;
+const X_AXONOMETRIC = 40.0;
+const Y_AXONOMETRIC = 45.0;
+const X_FRONT_VIEW = 0.0;
+const Y_FRONT_VIEW = 0.0;
+const X_SIDE_VIEW = 0.0;
+const Y_SIDE_VIEW = 90.0;
+const X_TOP_VIEW = 90.0;
+const Y_TOP_VIEW = 90.0;
 
 
 
@@ -45,8 +54,15 @@ const v = mat4(
     vec4(0,0,0,1)
     );
 
-let xAngle = 30* 2*Math.PI/360;
-let yAngle = 45* 2*Math.PI/360;
+let camController=  {
+    xAxis: X_AXONOMETRIC,
+    yAxis: Y_AXONOMETRIC,
+    Axonometric_View: true,
+    Front_View: false,
+    Side_View: false,
+    Top_View: false,
+    dummy: function() {}
+};
 
 let mView = v;
 
@@ -66,6 +82,16 @@ let fallSpeed = 10/VP_DISTANCE;
 
 let boxes = [];
 
+function init_cam_control() {
+
+    const gui = new dat.GUI();
+
+    let folder;
+    folder = gui.addFolder('Controls');
+    folder.add(camController, 'xAxis', 0, 90, 1);
+    folder.add(camController, 'yAxis', 0, 180, 1);
+
+    }
 
 function setup(shaders) {
     let canvas = document.getElementById("gl-canvas");
@@ -82,68 +108,39 @@ function setup(shaders) {
 
     resize_canvas();
 
-    let effectController;
-    init_axo_cam();
+    
+    init_cam_control();
 
-    function init_axo_cam() {
-
-        effectController = {
-            theta: 40.0,
-            gamma: 45.0,
-            dummy: function() {}
-          };
-
-        const gui = new dat.GUI();
-
-        let folder;
-        folder = gui.addFolder('Controls');
-
-        folder.add(effectController, 'theta', 0, 90, 1);
-        console.log(effectController.theta);
-        folder.add(effectController, 'gamma', 0, 180, 1);
-
-        }
 
     window.addEventListener("resize", resize_canvas);
 
-    document.getElementById("axonometric").addEventListener("change", setAxonometricView);
-
-    document.getElementById("front").addEventListener("change", setFrontView);
-
-    document.getElementById("side").addEventListener("change", setSideView);
-
-    document.getElementById("top").addEventListener("change", setTopView);
-
-
-    document.getElementById("rotCamY").addEventListener("input", function(event){
-        yAngle = (document.getElementById("rotCamY").value)*Math.PI*2/(360);
-
-    });
-
-    document.getElementById("rotCamX").addEventListener("input", function(event){
-        xAngle = (document.getElementById("rotCamX").value)*Math.PI*2/(360);
-    });
-
-
 
     function setAxonometricView(){
-        xAngle = 45 * Math.PI*2 /360;
-        yAngle = 45 * Math.PI*2 /360;
+        camController.xAxis = X_AXONOMETRIC;
+        camController.yAxis = Y_AXONOMETRIC;
+        camController.Axonometric_View = true;
+        camController.Front_View = false;
+        camController.Side_View = false;
+        camController.Top_View = false;
     }
 
     function setSideView(){
-        xAngle = 0;
-        yAngle = 0;
+        camController.xAxis = X_SIDE_VIEW;
+        camController.yAxis = Y_SIDE_VIEW;
+        camController.Axonometric_View = false;
+        camController.Front_View = true;
+        camController.Side_View = false;
+        camController.Top_View = false;
     }
 
     function setFrontView(){
-        xAngle = 0;
-        yAngle = 90 *Math.PI*2 /360;        
+        camController.xAxis = X_FRONT_VIEW;
+        camController.yAxis = Y_FRONT_VIEW;       
     }
 
     function setTopView(){
-        xAngle = 90 *Math.PI*2 /360;
-        yAngle = 90 *Math.PI*2 /360;
+        camController.xAxis = X_TOP_VIEW;
+        camController.yAxis = Y_TOP_VIEW;
     }
 
 
@@ -186,7 +183,7 @@ function setup(shaders) {
             case 'ArrowLeft':
                 if(velocity <= MAX_VELOCITY && distancey > 0){
                     breaking = false;
-                    if(velocity <= 0) velocity = 0.10;
+                    if(velocity <= 0) velocity = DECELARATION;
                     if(velocity*ACELARATION > MAX_VELOCITY) 
                         velocity = MAX_VELOCITY;
                     else
@@ -500,19 +497,23 @@ function setup(shaders) {
     }
 
     function loadRotationX(){
+
+        let x = camController.xAxis * DEGRE2RAD;
         return mat4(
             vec4(1, 0, 0, 0), 
-            vec4(0, Math.cos(xAngle), -Math.sin(xAngle), 0),
-            vec4(Math.sin(xAngle), 0, Math.cos(xAngle), 0), 
+            vec4(0, Math.cos(x), -Math.sin(x), 0),
+            vec4(Math.sin(x), 0, Math.cos(x), 0), 
             vec4(0, 0, 0 , 1)
             );
     }
 
     function loadRotationY(){
+
+        let y = camController.yAxis * DEGRE2RAD;
         return mat4(
-            vec4(Math.cos(yAngle), 0, Math.sin(yAngle), 0),
+            vec4(Math.cos(y), 0, Math.sin(y), 0),
             vec4(0, 1, 0, 0), 
-            vec4(-Math.sin(yAngle), 0, Math.cos(yAngle), 0), 
+            vec4(-Math.sin(y), 0, Math.cos(y), 0), 
             vec4(0, 0, 0, 1)
             );
     }
@@ -524,6 +525,7 @@ function setup(shaders) {
         console.log("Tilt: " + (heli_tilt) );
         console.log("Height: " + distancey);
         console.log("Blades Speed: " + bladesSpeed );
+        console.log(camController.Axonometric_View);
     }
 
     //in every call in render(), updates the blade's speed and angle
@@ -625,7 +627,7 @@ function setup(shaders) {
         
         loadMatrix(mView);
         
-        //printInfo();
+        printInfo();
 
         updateParameters();
 
