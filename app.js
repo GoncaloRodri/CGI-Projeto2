@@ -63,6 +63,8 @@ const v = mat4(
     vec4(0,0,0,1)
     );
 
+
+let mv;
 let camController=  {
     xAxis: X_AXONOMETRIC,
     yAxis: Y_AXONOMETRIC,
@@ -173,7 +175,6 @@ function setup(shaders) {
                 setTopView();
                 break;
             case ' ':
-                //console.log("time is:" + time)
                 boxes.push([distancey , time + BOX_LIFETIME, angle, velocity, BOX_INIT_VEL_Y]);
                 break;
             case 'ArrowUp':
@@ -270,23 +271,23 @@ function setup(shaders) {
 
     function windowRowBig() {
         pushMatrix();
-            multScale([1,1,15.25]);
             multTranslation([4.5,0,0]);
+            multScale([1,1,15.25]);
             windowUnit();
         popMatrix();
         pushMatrix();
-            multScale([1,1,15.25]);
             multTranslation([2,0,0]);
+            multScale([1,1,15.25]);
             windowUnit();
         popMatrix();
         pushMatrix();
-            multScale([1,1,15.25]);
             multTranslation([-2,0,0]);
+            multScale([1,1,15.25]);
             windowUnit();
         popMatrix();
         pushMatrix();
-            multScale([1,1,15.25]);
             multTranslation([-4.5,0,0]);
+            multScale([1,1,15.25]);
             windowUnit();
         popMatrix();
     }
@@ -324,18 +325,18 @@ function setup(shaders) {
 
     function windowRowMedium() {
         pushMatrix();
-            multScale([1,1,10.10]);
             multTranslation([3,17,0]);
-            windowUnit();
-        popMatrix();
-        pushMatrix();
             multScale([1,1,10.10]);
-            multTranslation([-0.05,17,0]);
             windowUnit();
         popMatrix();
         pushMatrix();
-            multScale([1,1,10.10]); 
+            multTranslation([-0.05,17,0]);
+            multScale([1,1,10.10]);
+            windowUnit();
+        popMatrix();
+        pushMatrix();
             multTranslation([-3,17,0]);
+            multScale([1,1,10.10]); 
             windowUnit();
         popMatrix();
     }
@@ -352,13 +353,13 @@ function setup(shaders) {
 
     function windowsRowSmall() {
         pushMatrix();
-            multScale([1,1,7.25]);
             multTranslation([1.4,0,0]);
+            multScale([1,1,7.25]);
             windowUnit();
         popMatrix();
         pushMatrix();
-            multScale([1,1,7.25]);
             multTranslation([-1.4,0,0]);
+            multScale([1,1,7.25]);
             windowUnit();
         popMatrix();        
     }
@@ -884,10 +885,7 @@ function setup(shaders) {
             }
             multTranslation([0,box[0],0]);
         }
-            //console.log("hit the floor at: " + time);
-        if(box[1] <= time)
-            boxes.splice(boxes.indexOf(box),1);
-        
+        if(box[1] <= time) boxes.splice(boxes.indexOf(box),1);
         
         multScale([1.5,1.5,1.5])
         uploadModelView();
@@ -970,10 +968,9 @@ function setup(shaders) {
 
 
     function renderInstances(){
-
         pushMatrix();
             cenary();
-        popMatrix();
+        popMatrix();  
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, 0, 0]);
@@ -1016,15 +1013,24 @@ function setup(shaders) {
 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
     
+
+        /*const model = mult(inverse(mView), mv);
+        const newp = mult(model, vec4(0,0,0,1));
+        const posfront = mult(model, vec4(0,0,2,1));
+        printm(model);
+        printm(newp);
+        printm(posfront);
+        
+        //loadMatrix(lookAt())
+        //printInfo();
+        */
+        
+        updateParameters();
+        
+        renderInstances();  
         mView = mult(mult(v, loadRotationX()), loadRotationY());
         
         loadMatrix(mView);
-        
-        //printInfo();
-
-        updateParameters();
-
-        renderInstances();
     }
 
 }
