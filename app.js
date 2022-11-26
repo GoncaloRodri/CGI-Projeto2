@@ -972,7 +972,6 @@ function setup(shaders) {
     }
 
     function tailBody() {
-        //greenTroops();
         multTranslation([4, 0.65, 0]);
         multScale([5.20, 0.75, 0.75]);
 
@@ -982,7 +981,7 @@ function setup(shaders) {
     }
 
     function cockpit() {
-        //greenTroops();
+        paintheli(vec3(0.3,0.57,0.5));
         multScale([5.56, 2.6, 2.6]);
 
         uploadModelView();
@@ -991,7 +990,7 @@ function setup(shaders) {
     }
 
     function tailSkid() {
-        //greenTroops();
+        paintheli(vec3(0.42,0.57,0.5));
         multRotationZ(-20);
         multScale([0.75, 1.5, 0.75]);
 
@@ -1001,7 +1000,6 @@ function setup(shaders) {
     }
 
     function tailRotor() {
-       // greenTroops();
         multScale([.25, 1, .25]);
 
         uploadModelView();
@@ -1010,13 +1008,30 @@ function setup(shaders) {
     }
 
     function tailBlades(xTrans) {
-       // greenTroops();
+        paintheli(vec3(0.8,0.9,0,87));
         multTranslation([xTrans * 0.6, 0.8, 0]);
         multScale([1, 0.2, 0.2]);
 
         uploadModelView();
 
         SPHERE.draw(gl, program, mode);
+    }
+
+
+    function paintheli(color){
+        gl.useProgram(program);
+        const uColor1 = gl.getUniformLocation(program, "uColor1");
+        const uColor2 = gl.getUniformLocation(program, "uColor2");
+        const uColor3 = gl.getUniformLocation(program, "uColor3");
+        const uColor4 = gl.getUniformLocation(program, "uColor4");
+        const uColor5 = gl.getUniformLocation(program, "uColor5");
+        const uColor6 = gl.getUniformLocation(program, "uColor6");
+        gl.uniform3fv(uColor1, color);
+        gl.uniform3fv(uColor2, color);
+        gl.uniform3fv(uColor3, color);
+        gl.uniform3fv(uColor4, color);
+        gl.uniform3fv(uColor5, color);
+        gl.uniform3fv(uColor6, color);
     }
 
     function body(velHeli) {
@@ -1046,7 +1061,7 @@ function setup(shaders) {
     }
 
     function topRotor() {
-       // greenTroops();
+        paintheli(vec3(0.8,0.9,0,87));
         multScale([0.2, 1.3, 0.2]);
 
         uploadModelView();
@@ -1055,7 +1070,7 @@ function setup(shaders) {
     }
 
     function blade() {
-        //greenTroops();
+        paintheli(vec3(0.8,0.9,0,87));
         multTranslation([2.5, 0.35, 0]);
         multScale([5, 0.2, 0.5]);
 
@@ -1087,7 +1102,7 @@ function setup(shaders) {
     }
 
     function connector(i) {
-        //greenTroops();
+        paintheli(vec3(0.5,0.5,0,5));
         multTranslation([0, -0.2, 0]);
         multRotationX(-30);
         multRotationZ(i*30);
@@ -1100,7 +1115,7 @@ function setup(shaders) {
     }
 
     function skid() {
-        //greenTroops();
+        paintheli(vec3(0.1,0.5,0,5));
         multScale([5, 0.2, 0.2]);
         multRotationZ(90);
 
