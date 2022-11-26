@@ -1,6 +1,6 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
 
-import { ortho, lookAt, flatten, mult, normalize, length, vec3, mat4, vec4, inverse, printm} from "../../libs/MV.js";
+import { ortho, flatten, mult, vec3, mat4, vec4} from "../../libs/MV.js";
 
 import { modelView, loadMatrix, multRotationY, multRotationZ, multScale, multRotationX, multTranslation, popMatrix, pushMatrix } from "../../libs/stack.js";
 
@@ -24,7 +24,7 @@ let animation = true;   // Animation is running
 
 let trees = []; 
 
-const VP_DISTANCE = 55;
+const VP_DISTANCE = 20;
 
 const ACELARATION = 1.2;
 const DECELARATION = 1.1;
@@ -56,6 +56,14 @@ const view_options = {
     
 };
 
+const MIN_THETA = 0;
+const MAX_THETA = 360;
+const THETA_STEP = 1;
+
+const MIN_GAMMA = 0;
+const MAX_GAMMA = 90;
+const GAMMA_STEP = 1; 
+
 const v = mat4(
     vec4(1,0,0,0),
     vec4(0,1,0,0), 
@@ -63,11 +71,9 @@ const v = mat4(
     vec4(0,0,0,1)
     );
 
-
-let mv;
 let camController=  {
-    xAxis: X_AXONOMETRIC,
-    yAxis: Y_AXONOMETRIC,
+    gamma: X_AXONOMETRIC,
+    theta: Y_AXONOMETRIC,
     view: view_options.Axonometric_View,
 };
 
@@ -91,7 +97,7 @@ function setup(shaders) {
     
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
-    let mProjection = ortho(-VP_DISTANCE * aspect, VP_DISTANCE * aspect, -VP_DISTANCE, VP_DISTANCE, -3 * VP_DISTANCE, 3 * VP_DISTANCE);
+    let mProjection = ortho(-VP_DISTANCE * aspect, VP_DISTANCE * aspect, -VP_DISTANCE, VP_DISTANCE, -3 * VP_DISTANCE, 10 * VP_DISTANCE);
 
     mode = gl.TRIANGLES;
 
@@ -103,8 +109,8 @@ function setup(shaders) {
     
         let folder;
         folder = gui.addFolder('Controls');
-        folder.add(camController, 'xAxis', 0, 90, 1);
-        folder.add(camController, 'yAxis', 0, 180, 1);
+        folder.add(camController, 'gamma', MIN_GAMMA, MAX_GAMMA, GAMMA_STEP);
+        folder.add(camController, 'theta', MIN_THETA, MAX_THETA, THETA_STEP);
         folder.add(camController, 'view', view_options).onChange(() => updateView());
         }
     
@@ -497,7 +503,6 @@ function setup(shaders) {
             popMatrix();
             i += 6;
         } 
-        // VER PQQ NAO APARECE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         pushMatrix();
             multTranslation([-40,0.025,0]);
             multScale([0.5,1,1]);
@@ -610,21 +615,12 @@ function setup(shaders) {
         trees.push([-50,26]);
         trees.push([-50,22]);
         trees.push([-54,24]);
-
         trees.push([-54,40]);
         trees.push([-50,43]);
     }
 
     treesPos();
 
-    function onde() {               // ONDEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-        multTranslation([-25,1,5]);
-        multScale([0.5,20,0.5]);
-
-        uploadModelView();
-
-        CUBE.draw(gl, program, mode);  
-    }
 
     function setOfTrees() {
         for (let i = 0; i < trees.length; i++) {
@@ -915,15 +911,6 @@ function setup(shaders) {
             );
     }
 
-    function printInfo(){
-        console.log("Velocity: " + velocity);
-        console.log("Is it Breaking: " + breaking);
-        console.log("Angle: " + (angle%360) );
-        console.log("Tilt: " + (heli_tilt) );
-        console.log("Height: " + distancey);
-        console.log("Blades Speed: " + bladesSpeed );
-        console.log(camController.Axonometric_View);
-    }
 
     //in every call in render(), updates the blade's speed and angle
     function setBladesSpeed(){
