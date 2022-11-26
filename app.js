@@ -36,7 +36,7 @@ const HEIGHT_RATIO = 0.5;
 const MAX_BLADE_SPEED = 300;
 const MAX_TILT = 30;
 const STARTING_HEIGHT = 10;
-const MOVEMENT_RADIUS = 30;
+const MOV_RAD = 30;
 const STARTING_POSITION = 90;
 const BOX_LIFETIME = 5;
 const DEGRE2RAD = Math.PI * 2 / 360;
@@ -73,7 +73,6 @@ let camController=  {
 let bladesSpeed = BLADE_SPEED;
 let angle = STARTING_POSITION;
 let distancey = STARTING_HEIGHT;
-let distancex = MOVEMENT_RADIUS;
 let velocity = 0;
 let breaking = false;
 let heli_tilt = 0;
@@ -981,7 +980,7 @@ function setup(shaders) {
     }
 
     //creates the body of the helicopter
-    function body(velHeli) {
+    function body(blade_angle) {
         pushMatrix();
             cockpit();
         popMatrix();
@@ -994,7 +993,7 @@ function setup(shaders) {
                 tailFin();
             popMatrix();
             multRotationX(90);
-            multRotationY(2*velHeli);
+            multRotationY(2*blade_angle);
             pushMatrix();
                 multTranslation([0, 0.4, 0]);
                 tailRotor();
@@ -1028,9 +1027,9 @@ function setup(shaders) {
     }
 
     //creates the top blades with 120 degrees between them
-    function topBlades(velHeli) {
+    function topBlades(blade_angle) {
         multTranslation([0.4, 1.25, 0]);
-        multRotationY(velHeli);
+        multRotationY(blade_angle);
 
         uploadModelView();
 
@@ -1181,7 +1180,7 @@ function setup(shaders) {
         popMatrix();  
         pushMatrix();
             multRotationY(-angle);
-            multTranslation([distancex, 0, 0]);
+            multTranslation([MOV_RAD, 0, 0]);
             multRotationY(90);
             //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
             multTranslation([-5.56/2,distancey+0.25,0]);
@@ -1196,7 +1195,7 @@ function setup(shaders) {
                 if (box[0] > 0.75 ) box[2] += box[3]; 
                 multRotationY(-box[2]);
                 pushMatrix();     
-                    multTranslation([distancex, 0, 0]);
+                    multTranslation([MOV_RAD, 0, 0]);
                     dropBox(box);
                 popMatrix();
             popMatrix();
