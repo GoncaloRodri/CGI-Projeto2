@@ -24,7 +24,7 @@ let animation = true;   // Animation is running
 
 let trees = []; 
 
-const VP_DISTANCE = 60;
+const VP_DISTANCE = 55;
 
 const ACELARATION = 1.2;
 const DECELARATION = 1.1;
@@ -881,7 +881,7 @@ function setup(shaders) {
                 box[0] = 0.75;
             }else{ 
                 box[0] -=  box[4];
-                box[4] = box[4]+0.05
+                box[4] = box[4]+0.05;
             }
             multTranslation([0,box[0],0]);
         }
@@ -951,7 +951,7 @@ function setup(shaders) {
     //updates the velocity of helicopter and the tilting angle
     function updateParameters() {
         if(breaking) {
-            velocity /= 1.1;
+            velocity /= DECELARATION;
             if (velocity <= 0.001){
                 velocity = 0;
                 breaking = false;
@@ -978,7 +978,6 @@ function setup(shaders) {
                 pushMatrix();
                     //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
                     multTranslation([-5.56/2,distancey+0.25,0]);
-
                     multRotationZ(heli_tilt);
                     multTranslation([5.56/2,1.5,0]);
                     body((blade_angle));
@@ -1012,19 +1011,7 @@ function setup(shaders) {
         gl.useProgram(program);
 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
-    
-
-        /*const model = mult(inverse(mView), mv);
-        const newp = mult(model, vec4(0,0,0,1));
-        const posfront = mult(model, vec4(0,0,2,1));
-        printm(model);
-        printm(newp);
-        printm(posfront);
-        
-        //loadMatrix(lookAt())
-        //printInfo();
-        */
-        
+            
         updateParameters();
         
         renderInstances();  
