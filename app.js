@@ -44,7 +44,7 @@ const X_SIDE_VIEW = 0.0;
 const Y_SIDE_VIEW = 90.0;
 const X_TOP_VIEW = 90.0;
 const Y_TOP_VIEW = 90.0;
-
+const BOX_INIT_VEL_Y = 0.1;
 const view_options = {
         Axonometric_View: "axo",
         Front_View: "front",
@@ -175,7 +175,7 @@ function setup(shaders) {
                 break;
             case ' ':
                 //console.log("time is:" + time)
-                boxes.push([distancey , time + BOX_LIFETIME, angle, velocity]);
+                boxes.push([distancey , time + BOX_LIFETIME, angle, velocity, BOX_INIT_VEL_Y]);
                 break;
             case 'ArrowUp':
                 if(distancey < MAX_HEIGHT)
@@ -188,7 +188,7 @@ function setup(shaders) {
             case 'ArrowLeft':
                 if(velocity <= MAX_VELOCITY && distancey > 0){
                     breaking = false;
-                    if(velocity <= 0) velocity = DECELARATION;
+                    if(velocity <= 0) velocity = 0.1;
                     if(velocity*ACELARATION > MAX_VELOCITY) 
                         velocity = MAX_VELOCITY;
                     else
@@ -485,10 +485,14 @@ function setup(shaders) {
     }
 
     function dropBox(box) {
-        if(box[0] > 0) {
-            if(box[0] - 1 < 0) box[0] = 0;
-            else box[0] -= 0.11;
-            multTranslation([0,box[0] + 0.25,0]);
+        if(box[0] >= 0.75) {
+            if(box[0] - 0.20 <= 0.75){ 
+                box[0] = 0.75;
+            }else{ 
+                box[0] -=  box[4];
+                box[4] = box[4]+0.05
+            }
+            multTranslation([0,box[0],0]);
         }
             //console.log("hit the floor at: " + time);
         if(box[1] <= time)
@@ -583,7 +587,6 @@ function setup(shaders) {
         pushMatrix();
             multRotationY(-angle);
             multTranslation([distancex, 0, 0]);
-           
             multRotationY(90);
                 pushMatrix();
                     //rotation applied on the down front Z-axis of the helicopter to guarantee that it dont rotate into the ground
@@ -597,10 +600,8 @@ function setup(shaders) {
         popMatrix();
         pushMatrix();
         boxes.forEach(box => {
-            pushMatrix();
-            console.log("box " + box);
-            
-            if(box[0] > 0 ) box[2] += box[3]; 
+            pushMatrix();            
+            if(box[0] > 0.75 ) box[2] += box[3]; 
             multRotationY(-box[2]);
             pushMatrix();     
             multTranslation([distancex, 0, 0]);
