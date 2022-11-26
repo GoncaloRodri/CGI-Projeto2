@@ -24,7 +24,7 @@ let animation = true;   // Animation is running
 
 let trees = []; 
 
-const VP_DISTANCE = 20;
+const VP_DISTANCE = 50;
 
 const ACELARATION = 1.2;
 const DECELARATION = 1.1;
@@ -137,23 +137,23 @@ function setup(shaders) {
     window.addEventListener("resize", resize_canvas);
 
     function setAxonometricView(){
-        camController.xAxis = X_AXONOMETRIC;
-        camController.yAxis = Y_AXONOMETRIC;
+        camController.gamma = X_AXONOMETRIC;
+        camController.theta = Y_AXONOMETRIC;
     }
 
     function setSideView(){
-        camController.xAxis = X_SIDE_VIEW;
-        camController.yAxis = Y_SIDE_VIEW;
+        camController.gamma = X_SIDE_VIEW;
+        camController.theta = Y_SIDE_VIEW;
     }
 
     function setFrontView(){
-        camController.xAxis = X_FRONT_VIEW;
-        camController.yAxis = Y_FRONT_VIEW;      
+        camController.gamma = X_FRONT_VIEW;
+        camController.theta = Y_FRONT_VIEW;      
     }
 
     function setTopView(){
-        camController.xAxis = X_TOP_VIEW;
-        camController.yAxis = Y_TOP_VIEW;
+        camController.gamma = X_TOP_VIEW;
+        camController.theta = Y_TOP_VIEW;
     }
 
     document.onkeydown = function (event) {
@@ -1166,7 +1166,7 @@ function setup(shaders) {
 
     function loadRotationX(){
 
-        let x = camController.xAxis * DEGRE2RAD;
+        let x = camController.gamma * DEGRE2RAD;
         return mat4(
             vec4(1, 0, 0, 0), 
             vec4(0, Math.cos(x), -Math.sin(x), 0),
@@ -1177,7 +1177,7 @@ function setup(shaders) {
 
     function loadRotationY(){
         
-        let y = camController.yAxis * DEGRE2RAD;
+        let y = camController.theta * DEGRE2RAD;
         return mat4(
             vec4(Math.cos(y), 0, Math.sin(y), 0),
             vec4(0, 1, 0, 0), 
