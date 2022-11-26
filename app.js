@@ -13,6 +13,7 @@ import * as CYLINDER from '../../libs/objects/cylinder.js';
 import * as CUBE from '../../libs/objects/cube.js';
 
 import * as PYRAMID from '../../libs/objects/pyramid.js';
+import { lookAt, printm } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -46,14 +47,14 @@ const Y_FRONT_VIEW = 0.0;
 const X_SIDE_VIEW = 0.0;
 const Y_SIDE_VIEW = 90.0;
 const X_TOP_VIEW = 90.0;
-const Y_TOP_VIEW = 90.0;
+const Y_TOP_VIEW = 0.0;
 const BOX_INIT_VEL_Y = 0.1;
 const view_options = {
         Axonometric_View: "axo",
         Front_View: "front",
         Side_View: "side",
         Top_View: "top"
-    
+  
 };
 
 const MIN_THETA = 0;
@@ -64,20 +65,12 @@ const MIN_GAMMA = 0;
 const MAX_GAMMA = 90;
 const GAMMA_STEP = 1; 
 
-const v = mat4(
-    vec4(1,0,0,0),
-    vec4(0,1,0,0), 
-    vec4(0,0,1,0), 
-    vec4(0,0,0,1)
-    );
-
 let camController=  {
     gamma: X_AXONOMETRIC,
     theta: Y_AXONOMETRIC,
     view: view_options.Axonometric_View,
 };
 
-let mView = v;
 let bladesSpeed = BLADE_SPEED;
 let angle = STARTING_POSITION;
 let distancey = STARTING_HEIGHT;
@@ -97,12 +90,13 @@ function setup(shaders) {
     
     let program = buildProgramFromSources(gl, shaders["shader.vert"], shaders["shader.frag"]);
 
-    let mProjection = ortho(-VP_DISTANCE * aspect, VP_DISTANCE * aspect, -VP_DISTANCE, VP_DISTANCE, -3 * VP_DISTANCE, 10 * VP_DISTANCE);
+    let mProjection = ortho(-VP_DISTANCE * aspect, VP_DISTANCE * aspect, -VP_DISTANCE, VP_DISTANCE, -3 * VP_DISTANCE, 3 * VP_DISTANCE);
 
     mode = gl.TRIANGLES;
 
     resize_canvas();
 
+    //Initialize the dat.gui camera controler
     function init_cam_control() {
 
         const gui = new dat.GUI();
@@ -136,21 +130,26 @@ function setup(shaders) {
 
     window.addEventListener("resize", resize_canvas);
 
+    //sets the gamma and theta values to the axonometric view values
     function setAxonometricView(){
+        
         camController.gamma = X_AXONOMETRIC;
         camController.theta = Y_AXONOMETRIC;
     }
 
+    //sets the gamma and theta values to the side view values
     function setSideView(){
         camController.gamma = X_SIDE_VIEW;
         camController.theta = Y_SIDE_VIEW;
     }
 
+    //sets the gamma and theta values to the front view values
     function setFrontView(){
         camController.gamma = X_FRONT_VIEW;
         camController.theta = Y_FRONT_VIEW;      
     }
 
+    //sets the gamma and theta values to the top view values
     function setTopView(){
         camController.gamma = X_TOP_VIEW;
         camController.theta = Y_TOP_VIEW;
@@ -952,6 +951,7 @@ function setup(shaders) {
         CUBE.draw(gl, program, mode); 
     }
 
+    //creates the garden
     function garden() {
         pushMatrix();
             setOfTrees();
@@ -965,12 +965,14 @@ function setup(shaders) {
         popMatrix();
     }
 
+    //creates the cenary with all its building, road and the garden
     function cenary() {
         buildings();
         floor();
         garden();
     }
 
+    //creates the tail
     function tailBody() {
         multTranslation([4, 0.65, 0]);
         multScale([5.20, 0.75, 0.75]);
@@ -980,6 +982,7 @@ function setup(shaders) {
         SPHERE.draw(gl, program, mode);
     }
 
+    //creates the cockpit
     function cockpit() {
         paintheli(vec3(0.3,0.57,0.5));
         multScale([5.56, 2.6, 2.6]);
@@ -989,7 +992,8 @@ function setup(shaders) {
         SPHERE.draw(gl, program, mode);
     }
 
-    function tailSkid() {
+    //creates the fin of the helicopter
+    function tailFin() {
         paintheli(vec3(0.42,0.57,0.5));
         multRotationZ(-20);
         multScale([0.75, 1.5, 0.75]);
@@ -999,6 +1003,7 @@ function setup(shaders) {
         SPHERE.draw(gl, program, mode);
     }
 
+    //creates the rotor of the tail of the helicopter
     function tailRotor() {
         multScale([.25, 1, .25]);
 
@@ -1007,6 +1012,7 @@ function setup(shaders) {
         CYLINDER.draw(gl, program, mode);
     }
 
+    //creates the blades of the tail of the helicopter
     function tailBlades(xTrans) {
         paintheli(vec3(0.8,0.9,0,87));
         multTranslation([xTrans * 0.6, 0.8, 0]);
@@ -1017,7 +1023,7 @@ function setup(shaders) {
         SPHERE.draw(gl, program, mode);
     }
 
-
+    //function that paints the instance that its called in
     function paintheli(color){
         gl.useProgram(program);
         const uColor1 = gl.getUniformLocation(program, "uColor1");
@@ -1034,6 +1040,7 @@ function setup(shaders) {
         gl.uniform3fv(uColor6, color);
     }
 
+    //creates the body of the helicopter
     function body(velHeli) {
         pushMatrix();
             cockpit();
@@ -1045,7 +1052,7 @@ function setup(shaders) {
         pushMatrix();
                 multTranslation([6.55, 1.2, 0]);
                 pushMatrix();
-                    tailSkid();
+                    tailFin();
                 popMatrix();
                     multRotationX(90);
                     multRotationY(2*velHeli);
@@ -1060,6 +1067,7 @@ function setup(shaders) {
         popMatrix();
     }
 
+    //creates the top rotor of the helicopter
     function topRotor() {
         paintheli(vec3(0.8,0.9,0,87));
         multScale([0.2, 1.3, 0.2]);
@@ -1069,6 +1077,7 @@ function setup(shaders) {
         CYLINDER.draw(gl, program, mode);
     }
 
+    //creates a balde
     function blade() {
         paintheli(vec3(0.8,0.9,0,87));
         multTranslation([2.5, 0.35, 0]);
@@ -1079,6 +1088,7 @@ function setup(shaders) {
         SPHERE.draw(gl, program, mode);
     }
 
+    //creates the top blades with 120 degrees between them
     function topBlades(velHeli) {
         multTranslation([0.4, 1.25, 0]);
         multRotationY(velHeli);
@@ -1101,6 +1111,7 @@ function setup(shaders) {
         popMatrix();
     }
 
+    //creates a connector
     function connector(i) {
         paintheli(vec3(0.5,0.5,0,5));
         multTranslation([0, -0.2, 0]);
@@ -1114,6 +1125,7 @@ function setup(shaders) {
         CYLINDER.draw(gl, program, mode);
     }
 
+    //creates a skid
     function skid() {
         paintheli(vec3(0.1,0.5,0,5));
         multScale([5, 0.2, 0.2]);
@@ -1124,6 +1136,7 @@ function setup(shaders) {
         CYLINDER.draw(gl, program, mode);
     }
 
+    //creates a group of one skid and two connectors
     function skidPlusConnectors() {
         pushMatrix();
             pushMatrix();
@@ -1148,6 +1161,7 @@ function setup(shaders) {
         popMatrix();
     }
 
+    //creates a box and calculates where it is and the age, as well as its colors
     function dropBox(box) {
 
         let brown1 = vec3(0.57,0.40,0.18);
@@ -1177,28 +1191,6 @@ function setup(shaders) {
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
-    }
-
-    function loadRotationX(){
-
-        let x = camController.gamma * DEGRE2RAD;
-        return mat4(
-            vec4(1, 0, 0, 0), 
-            vec4(0, Math.cos(x), -Math.sin(x), 0),
-            vec4(Math.sin(x), 0, Math.cos(x), 0), 
-            vec4(0, 0, 0 , 1)
-            );
-    }
-
-    function loadRotationY(){
-        
-        let y = camController.theta * DEGRE2RAD;
-        return mat4(
-            vec4(Math.cos(y), 0, Math.sin(y), 0),
-            vec4(0, 1, 0, 0), 
-            vec4(-Math.sin(y), 0, Math.cos(y), 0), 
-            vec4(0, 0, 0, 1)
-            );
     }
 
 
@@ -1243,7 +1235,7 @@ function setup(shaders) {
         lastVelocity = velocity;
     }
 
-
+    //build all instances in the app
     function renderInstances(){
         pushMatrix();
             cenary();
@@ -1279,6 +1271,19 @@ function setup(shaders) {
 
     }
 
+    //calculates the view matrix
+    function getView(){
+        const r = VP_DISTANCE;
+
+        const a = r * -Math.cos(camController.gamma*DEGRE2RAD);
+
+        const x = a * Math.cos(camController.theta*DEGRE2RAD);
+        const y = r * Math.sin(camController.gamma*DEGRE2RAD);
+        const z = a * -Math.sin(camController.theta*DEGRE2RAD);
+
+        return lookAt([x,y,z], [0,0,0], [0,1,0]);
+    }
+
     function render() {
         if (animation) time += speed;
 
@@ -1292,10 +1297,9 @@ function setup(shaders) {
             
         updateParameters();
         
-        renderInstances();  
-        mView = mult(mult(v, loadRotationX()), loadRotationY());
-        
-        loadMatrix(mView);
+        renderInstances(); 
+
+        loadMatrix(getView());
     }
 
 }
