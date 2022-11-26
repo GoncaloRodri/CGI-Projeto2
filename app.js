@@ -789,6 +789,7 @@ function setup(shaders) {
             multTranslation([-40,0,0]);
             straightLines4ParkingLot();
         popMatrix();
+        verticalLines(-51);
         verticalLines(-49);
         verticalLines(-47);
         verticalLines(-45);
@@ -799,6 +800,7 @@ function setup(shaders) {
         verticalLines(-35);
         verticalLines(-33);
         verticalLines(-31);
+        verticalLines(-29);
     }
 
     function parkingLot() {
@@ -984,7 +986,7 @@ function setup(shaders) {
 
     //creates the cockpit
     function cockpit() {
-        paintheli(vec3(0.3,0.57,0.5));
+        paintheli(vec3(0,0,0.5));
         multScale([5.56, 2.6, 2.6]);
 
         uploadModelView();
@@ -994,7 +996,7 @@ function setup(shaders) {
 
     //creates the fin of the helicopter
     function tailFin() {
-        paintheli(vec3(0.42,0.57,0.5));
+        paintheli(vec3(0,0,0.5));
         multRotationZ(-20);
         multScale([0.75, 1.5, 0.75]);
 
@@ -1014,7 +1016,7 @@ function setup(shaders) {
 
     //creates the blades of the tail of the helicopter
     function tailBlades(xTrans) {
-        paintheli(vec3(0.8,0.9,0,87));
+        paintheli(vec3(1,1,1));
         multTranslation([xTrans * 0.6, 0.8, 0]);
         multScale([1, 0.2, 0.2]);
 
@@ -1079,7 +1081,7 @@ function setup(shaders) {
 
     //creates a balde
     function blade() {
-        paintheli(vec3(0.8,0.9,0,87));
+        paintheli(vec3(1,1,1));
         multTranslation([2.5, 0.35, 0]);
         multScale([5, 0.2, 0.5]);
 
@@ -1127,7 +1129,7 @@ function setup(shaders) {
 
     //creates a skid
     function skid() {
-        paintheli(vec3(0.1,0.5,0,5));
+        paintheli(vec3(0.98,0.98,0.98));
         multScale([5, 0.2, 0.2]);
         multRotationZ(90);
 
