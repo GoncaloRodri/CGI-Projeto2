@@ -17,13 +17,13 @@ void main() {
     gl_Position = mProjection * mModelView * vPosition;
 
     if (vNormal.x == 0.0 && vNormal.y > 0.0 && vNormal.z == 0.0 ||
-    vNormal.x == 0.0 && vNormal.y < 0.0 && vNormal.z == 0.0)  // partes de cima
+    vNormal.x == 0.0 && vNormal.y < 0.0 && vNormal.z == 0.0)  
         fColor = uColor1;
     else if (vNormal.x < 0.0 && vNormal.y == 0.0 && vNormal.z == 0.0 || 
-    vNormal.x > 0.0 && vNormal.y == 0.0 && vNormal.z == 0.0) // partes à esquerda
+    vNormal.x > 0.0 && vNormal.y == 0.0 && vNormal.z == 0.0) 
         fColor = uColor2;
     else if (vNormal.x == 0.0 && vNormal.y == 0.0 && vNormal.z > 0.0 || 
-    vNormal.x == 0.0 && vNormal.y == 0.0 && vNormal.z < 0.0)   // partes à direita
+    vNormal.x == 0.0 && vNormal.y == 0.0 && vNormal.z < 0.0)   
         fColor = uColor3;
     else if (vNormal.x < 0.0 && vNormal.y < 0.0 && vNormal.z > 0.0)
         fColor = uColor4;
